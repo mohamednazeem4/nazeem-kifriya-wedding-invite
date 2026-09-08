@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1c1115">
+<meta name="description" content="Mohamed Nazeem & Kifriya Muqsin — 26 December 2026">
+<title>Mohamed Nazeem &amp; Kifriya Muqsin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Mrs+Saint+Delafield&family=Montserrat:wght@300;400;500;600&display=swap');
+
+:root{
+  --ink:#f8eee7;
+  --gold:#d5ad67;
+  --gold-soft:#e9cfa0;
+  --wine:#35151f;
+  --wine-deep:#1b0e13;
+  --rose:#8d4051;
+  --cream:#f7eee7;
+  --cream-deep:#efe0d7;
+  --dark:#180e12;
+  --text:#3b292e;
+  --text-soft:#7a5f66;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--dark);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:300}
+section{position:relative;overflow:hidden}
+button,a{font:inherit}
+img{max-width:100%}
+
+/* ---------- shared motifs ---------- */
+.kicker{font-size:10px;letter-spacing:4px;color:var(--text-soft)}
+.amp{font-family:'Mrs Saint Delafield',cursive;display:inline-block}
+.reveal{opacity:0;transform:translateY(35px);transition:opacity .9s ease,transform .9s ease}
+.reveal.show{opacity:1;transform:none}
+@keyframes rise{to{opacity:1;transform:translateY(0)}from{transform:translateY(20px)}}
+@keyframes pulse{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition:none!important;scroll-behavior:auto!important}}
+
+.arch{width:min(60%,220px);aspect-ratio:3/4;margin:0 auto;border:1px solid var(--gold);border-radius:120px 120px 6px 6px;position:relative;display:grid;place-items:center}
+.arch:before{content:"";position:absolute;inset:8px;border:1px solid rgba(213,173,103,.5);border-radius:110px 110px 3px 3px}
+
+/* ================= ENTRANCE (premium artwork) ================= */
+.entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;transition:opacity .95s ease,visibility .95s ease}
+.entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden}
+.entrance-art{width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
+.entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
+.entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
+.touch-pulse{position:absolute;z-index:5;bottom:7.8%;left:50%;width:72px;height:72px;transform:translateX(-50%);border:1px solid rgba(246,225,184,.5);border-radius:50%;opacity:.55;animation:touchPulse 1.8s ease-out infinite;pointer-events:none}
+.entrance-stage:hover .entrance-art,.entrance-stage:focus .entrance-art{transform:scale(1.01)}
+.opening.entering .entrance-art{transform:scale(1.11);filter:blur(2px) brightness(1.12);opacity:0}
+.opening.entering .touch-pulse{animation:none;opacity:0;transform:translateX(-50%) scale(1.8);transition:opacity .35s,transform .55s}
+@keyframes touchPulse{0%{transform:translateX(-50%) scale(.72);opacity:0}25%{opacity:.55}100%{transform:translateX(-50%) scale(1.45);opacity:0}}
+@media(max-width:650px){.entrance-stage:after{inset:5px}.touch-pulse{bottom:8.2%}}
+
+/* ================= HERO ================= */
+.opening{min-height:100svh;display:grid;place-items:center;text-align:center;background:
+radial-gradient(circle at 50% 38%,rgba(213,173,103,.18),transparent 30%),
+linear-gradient(145deg,#1b0e13,#4a202b 55%,#160b0f)}
+.opening .content{position:relative;z-index:2;padding:clamp(24px,6vw,40px) 24px;max-width:820px;margin:0 auto}
+.bismillah{font-family:'Cormorant Garamond','Scheherazade New',serif;font-size:clamp(22px,4.6vw,30px);color:var(--gold-soft);letter-spacing:.01em;line-height:1.6;opacity:0;animation:rise 1.1s .1s forwards;margin-bottom:16px}
+.monogram{font-family:"Cormorant Garamond";font-size:clamp(22px,4.5vw,30px);letter-spacing:8px;color:var(--gold);opacity:0;animation:rise 1.2s .2s forwards}
+.eyebrow{font-size:10px;letter-spacing:4px;margin-top:24px;opacity:0;animation:rise 1s .5s forwards}
+h1{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,10.5vw,96px);line-height:.86;margin:22px 0;color:#fff0e7;opacity:0;animation:rise 1.3s .7s forwards}
+h1 .name-line{display:block;white-space:nowrap}
+h1 .amp{display:block;font-size:.46em;color:var(--gold);line-height:1.6;margin:.08em 0}
+.tagline{font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(16px,3.2vw,19px);color:var(--gold-soft);max-width:24em;margin:0 auto 6px;line-height:1.55;opacity:0;animation:rise 1s .9s forwards}
+.scrollhint{position:absolute;bottom:25px;font-size:9px;letter-spacing:3px;opacity:.65}
+.scrollhint:after{content:"";display:block;width:1px;height:35px;background:var(--gold);margin:10px auto 0;animation:pulse 1.5s infinite}
+
+/* ================= WELCOME ================= */
+.intro{background:var(--cream);color:var(--text);display:grid;place-items:center;text-align:center;padding:90px 24px;min-height:70svh}
+.intro-inner{max-width:640px}
+.flower{font-size:30px;color:var(--gold);margin-bottom:22px}
+.intro h2,.venue h2,.closing h2,.schedule h2,.reveal-section h2{font-family:"Cormorant Garamond";font-weight:400;font-size:clamp(38px,6.5vw,58px);margin:14px 0;color:var(--rose)}
+.intro p,.closing p{font-family:"Cormorant Garamond";font-size:21px;line-height:1.65}
+
+/* ================= SCRATCH-TO-REVEAL DATE ================= */
+.reveal-section{background:var(--cream-deep);color:var(--text);display:grid;place-items:center;text-align:center;padding:90px 20px;min-height:80svh}
+.scratch-stage{position:relative;width:min(74%,220px);aspect-ratio:1/1;margin:38px auto 14px}
+.heart-card{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 6px 14px rgba(75,32,45,.18))}
+.heart-mask{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z'/%3E%3C/svg%3E");-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+.scratch-under{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:10px 24px}
+.scratch-under .rlabel{font-size:10px;letter-spacing:3px;color:#8c6a46;margin-bottom:8px}
+.scratch-under .rdate{font-family:"Cormorant Garamond";font-size:28px;color:var(--rose);line-height:1.2}
+.scratch-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;transition:opacity .6s ease}
+.scratch-hint{font-size:10px;letter-spacing:3px;color:#8c6a46;margin-top:16px}
+
+/* ================= COUNTDOWN ================= */
+.countdown{background:linear-gradient(135deg,#2a1219,#542431);text-align:center;padding:90px 20px;display:flex;flex-direction:column;justify-content:center;min-height:60svh}
+.countdown h2{font-family:"Cormorant Garamond";font-weight:300;font-size:46px;color:#fff0e7;margin:0 0 35px}
+.timer{display:grid;grid-template-columns:repeat(4,1fr);max-width:760px;width:100%;margin:auto;gap:10px}
+.tbox{padding:18px 5px;border-top:1px solid rgba(213,173,103,.5);border-bottom:1px solid rgba(213,173,103,.5)}
+.tnum{display:block;font-family:"Cormorant Garamond";font-size:clamp(36px,7vw,62px);color:var(--gold)}
+.tlabel{font-size:9px;letter-spacing:2px;color:#ead8cc}
+
+/* ================= ORDER OF THE DAY ================= */
+.schedule{background:#fbf4ee;color:var(--text);padding:90px 22px;text-align:center}
+.schedule-inner{max-width:420px;margin:0 auto}
+.timeline{position:relative;max-width:300px;margin:44px auto 0;text-align:left}
+.timeline:before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:0;border-left:1px dashed var(--gold);transform:translateX(-50%)}
+.t-row{display:grid;grid-template-columns:1fr 30px 1fr;align-items:center;min-height:68px}
+.t-time{font-family:"Cormorant Garamond";font-size:22px;color:var(--text);text-align:right;padding-right:12px;font-weight:500}
+.t-label{font-size:16px;letter-spacing:.03em;color:var(--text-soft);text-align:left;padding-left:12px;line-height:1.4}
+.t-mark{position:relative;display:flex;align-items:center;justify-content:center}
+.t-mark .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.t-mark.bloom .dot{display:none}
+
+/* ================= VENUE ================= */
+.venue{background:var(--wine);padding:90px 22px;display:grid;place-items:center;text-align:center}
+.venue-inner{max-width:900px;width:100%}
+.venue h2{color:#f7e8df}
+.venue-name{font-family:"Cormorant Garamond";font-size:30px;color:var(--gold);margin-bottom:20px}
+.venue-address{font-size:13px;line-height:1.8;opacity:.8}
+.location-wrap{display:grid;grid-template-columns:220px 1fr;gap:45px;align-items:center;margin-top:45px;text-align:left}
+.qr{background:#fff;padding:12px;width:220px;border-radius:4px}
+.qr img{width:100%;display:block}
+.qr-label{font-size:9px;color:#4b3940;letter-spacing:2px;text-align:center;margin-top:9px}
+.map-button{display:inline-block;background:var(--gold);color:#241419;padding:14px 25px;text-decoration:none;letter-spacing:1px;font-size:11px;margin-top:18px;border-radius:30px}
+
+/* ================= CLOSING ================= */
+.closing{background:var(--cream);color:var(--text);display:grid;place-items:center;text-align:center;padding:90px 22px}
+.closing h2{font-size:52px}
+.initials{font-family:"Cormorant Garamond";font-size:26px;letter-spacing:9px;color:var(--gold);margin-top:35px}
+footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size:9px;letter-spacing:3px}
+
+@media(max-width:650px){
+ .timer{grid-template-columns:repeat(2,1fr);max-width:340px}
+ .location-wrap{grid-template-columns:1fr;text-align:center;justify-items:center}
+ .venue-address br{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="entrance" id="entrance">
+  <div class="entrance-stage" id="envelope" role="button" tabindex="0" aria-label="Touch to open wedding invitation">
+    <img class="entrance-art" src="assets/entrance-wedding.png" alt="Sealed wedding invitation for Mohamed Nazeem and Kifriya Muqsin">
+    <span class="touch-pulse" aria-hidden="true"></span>
+  </div>
+</div>
+
+<section class="opening" id="home">
+  <div class="content">
+    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    <div class="monogram">N · K</div>
+    <h1><span class="name-line">Mohamed Nazeem</span><span class="amp">&amp;</span><span class="name-line">Kifriya Muqsin</span></h1>
+  </div>
+  <div class="scrollhint">SCROLL TO DISCOVER</div>
+</section>
+
+<section class="intro" id="welcome">
+  <div class="intro-inner reveal">
+    <div class="flower">✦</div>
+    <p>WITH JOY IN OUR HEARTS</p>
+    <h2>Together with our families,<br>we invite you to<br>celebrate with us.</h2>
+    <p>As we begin a beautiful new chapter together, your presence would make our celebration even more meaningful.</p>
+  </div>
+</section>
+
+<section class="reveal-section">
+  <div class="reveal">
+    <h2>OUR DATE DROP</h2>
+    <p>SAVE IT, DON'T MISS IT</p>
+    <p style="font-family:'Cormorant Garamond';font-size:18px;color:var(--text-soft)">Scratch the heart below to uncover our wedding date.</p>
+    <div class="scratch-stage" id="scratchStage">
+      <svg class="heart-card" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z" fill="var(--cream)" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round"/>
+      </svg>
+      <div class="scratch-under">
+        <div class="rdate">26th<br>December<br>2026</div>
+      </div>
+      <canvas class="scratch-canvas heart-mask" id="scratchCanvas"></canvas>
+    </div>
+    <div class="scratch-hint" id="scratchHint">✦ SCRATCH TO REVEAL ✦</div>
+  </div>
+</section>
+
+<section class="countdown">
+  <div class="reveal">
+    <div class="kicker" style="color:var(--gold)">THE BIG DAY IS COMING</div>
+    <h2>Counting down to forever</h2>
+    <div class="timer">
+      <div class="tbox"><span class="tnum" id="d">--</span><span class="tlabel">DAYS</span></div>
+      <div class="tbox"><span class="tnum" id="h">--</span><span class="tlabel">HOURS</span></div>
+      <div class="tbox"><span class="tnum" id="m">--</span><span class="tlabel">MINUTES</span></div>
+      <div class="tbox"><span class="tnum" id="s">--</span><span class="tlabel">SECONDS</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="schedule">
+  <div class="schedule-inner reveal">
+    <p>THE CELEBRATION</p>
+    <h2>Order of the day</h2>
+    <p style="font-family:'Cormorant Garamond';font-size:24px;color:var(--text-soft)">Saturday, 26th December 2026</p>
+    <div class="timeline">
+      <div class="t-row">
+        <div class="t-time">11:00 AM</div>
+        <div class="t-mark"><span class="dot"></span></div>
+        <div class="t-label">Arrival</div>
+      </div>
+      <div class="t-row">
+        <div class="t-time">11:30 AM</div>
+        <div class="t-mark bloom">
+          <svg width="24" height="24" viewBox="0 0 26 26" fill="none">
+            <g fill="var(--gold)">
+              <ellipse cx="13" cy="7" rx="3.4" ry="5"/>
+              <ellipse cx="13" cy="19" rx="3.4" ry="5"/>
+              <ellipse cx="7" cy="13" rx="5" ry="3.4"/>
+              <ellipse cx="19" cy="13" rx="5" ry="3.4"/>
+            </g>
+            <circle cx="13" cy="13" r="3" fill="#fbf4ee" stroke="#8c6a46" stroke-width="0.8"/>
+          </svg>
+        </div>
+        <div class="t-label">Nikkah</div>
+      </div>
+      <div class="t-row">
+        <div class="t-time">12:00 PM</div>
+        <div class="t-mark"><span class="dot"></span></div>
+        <div class="t-label">Lunch</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="venue">
+  <div class="venue-inner reveal">
+    <h2>THE VENUE</h2>
+    <div class="venue-name">C.S.I Lite Auditorium</div>
+    <div class="venue-address">17 Balfour Road, behind CSI BAIN Matric Higher Secondary School,<br>Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India</div>
+    <div class="location-wrap">
+      <div class="qr"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAAC1UlEQVR4nO2cTYrjMBBGX40Es5ShD5CjyDcb+mbWUXKAAXsZkKlZSHKcpidNM0nGgqpFiNtvUfB1/agkRZTvWPrxLRyMN974p/KLVBvbt/K3kVVkBNp7/xp/jH8w71RVtSRqVc3IiFOSeHRaPERVVZ1f5Y/xj+ZrcAIk8ZAGKIKmU6aF8+v8Mf4pfFAFnBJnEBn+tz/G/zPv9w/LWybqKpoGRGH1EufX+mP8M3hVzUC4iMjgahCnwSlpAAiqOr3QH+MfxdcyC0CcnX76Uc2pTkfz3/gvTG+NmpC3njrcvDZ9O+NRnV1LvlS5iXMTfmoIFr+d8uEiMrKJvIhAyNuaySmwSg3sA/pv/D1row2nZYwxhYxOJT9nIGR2OdvitzO+tM41SQdVYntkWwm3F1Z/++OrllF1H79F89ZfEWdn/VWffF0fbQrWhKwZas6uSdr07Ztfy/4R8ezR98GpTqxCEfn8Uz/yz/bH+IfwLS6DainCdX20jTZC3oe4xW9nfJk/S5xXDyDK8pY1DW7HCIBCfoE/xj+Wb71yC9PrVKO+vYaz1d9++TiDjNsso1jIkERE308XgcXOb/THt6ht61+dcLupc22sZ6z+9slv8w2oU+fr1lE7lbObaZm+nfFN2jbaaCvh63yjSmv1t0t+P78qWXmmyU0L3dpzWfz2x39aem+idj+pNH1743elt+0ltO2GWomBuklo8dsff3N+YxfJrfEqO4Wt5zJ9O+Sv9xfK0ncVGcvS1yMjlI+yHD6i/8bfMQ+4DICUb4sHFo8QZkgjKMsqJHH5eP4bf9/q/HkTmair1zSCsvgsdZzlMixvL/DH+OfyIuKRXzPIGC5y7bnqdYaj+2/8rd3cXwgXIU4g6aSQhrmdb1/aSPpw/ht/34q+u0veaZjLo8SzzxB+3/wLHM1/47/m1+3Wb5VSRDz6fsoQz03eclLniP4b/3cT+30G443vlv8Coppeih78udgAAAAASUVORK5CYII=" alt="Exact venue location QR code"><div class="qr-label">SCAN FOR LOCATION</div></div>
+      <div>
+        <div class="kicker" style="color:var(--gold)">EXACT LOCATION</div>
+        <p style="line-height:1.8;opacity:.8;font-size:14px">Scan the QR code or tap below to open the exact venue location in Google Maps.</p>
+        <a class="map-button" href="https://maps.app.goo.gl/vCj9A8aYLNcTYaUK8?g_st=ic" target="_blank" rel="noopener">OPEN IN GOOGLE MAPS ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="reveal">
+    <div class="flower">❦</div>
+    <div class="kicker">WITH LOVE</div>
+    <h2>Mohamed Nazeem<br><span class="amp" style="font-size:.7em;color:#b88932">&amp;</span><br>Kifriya Muqsin</h2>
+    <p>We look forward to sharing our special day with you.</p>
+    <div class="initials">N · K</div>
+  </div>
+</section>
+<footer>26 · 12 · 2026 &nbsp; | &nbsp; MOHAMED NAZEEM &amp; KIFRIYA MUQSIN</footer>
+
+<script>
+// ---------- ENTRANCE ----------
+const envelope = document.getElementById("envelope");
+const opening = document.querySelector(".opening");
+const entrance = document.getElementById("entrance");
+function openInvitation(){
+  if(opening.classList.contains("entering")) return;
+  opening.classList.add("entering");
+  setTimeout(() => entrance.classList.add("hidden"), 900);
+}
+envelope.addEventListener("click", openInvitation);
+envelope.addEventListener("keydown", e => {
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openInvitation(); }
+});
+
+// ---------- COUNTDOWN ----------
+// 26 Dec 2026, 11:30 AM IST (UTC+5:30) = 06:00 UTC — fixed to IST so it's
+// accurate no matter what timezone the visitor's browser is in.
+const target = Date.UTC(2026, 11, 26, 6, 0, 0);
+function tick(){
+  const now = Date.now();
+  const diff = Math.max(0, target - now);
+  const dd = Math.floor(diff / 86400000);
+  const hh = Math.floor((diff % 86400000) / 3600000);
+  const mm = Math.floor((diff % 3600000) / 60000);
+  const ss = Math.floor((diff % 60000) / 1000);
+  const pad = n => String(n).padStart(2,"0");
+  document.getElementById("d").textContent = dd;
+  document.getElementById("h").textContent = pad(hh);
+  document.getElementById("m").textContent = pad(mm);
+  document.getElementById("s").textContent = pad(ss);
+}
+tick(); setInterval(tick, 1000);
+
+// ---------- SCROLL REVEALS ----------
+const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add("show"); }), {threshold:.12});
+document.querySelectorAll(".reveal").forEach(e => io.observe(e));
+
+// ---------- SCRATCH CARD ----------
+(function(){
+  const canvas = document.getElementById('scratchCanvas');
+  const stage = document.getElementById('scratchStage');
+  const hint = document.getElementById('scratchHint');
+  const ctx = canvas.getContext('2d');
+  let revealed = false;
+
+  function sizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    drawScratchLayer();
+  }
+
+  function drawScratchLayer(){
+    const w = canvas.width, h = canvas.height;
+    ctx.globalCompositeOperation = 'source-over';
+    const grad = ctx.createLinearGradient(0,0,w,h);
+    grad.addColorStop(0, '#e9cfa0');
+    grad.addColorStop(1, '#8c6a46');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,w,h);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 1;
+    for(let i=0;i<6;i++){
+      ctx.beginPath();
+      const a = (Math.PI*2/6)*i;
+      ctx.moveTo(w/2, h/2);
+      ctx.lineTo(w/2 + Math.cos(a)*w*0.42, h/2 + Math.sin(a)*w*0.42);
+      ctx.stroke();
+    }
+  }
+
+  sizeCanvas();
+  window.addEventListener('resize', sizeCanvas);
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+
+  function scratchAt(x, y){
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function checkCleared(){
+    if(revealed) return;
+    const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    let cleared = 0, total = 0;
+    for(let i=3;i<data.length;i+=4*40){
+      total++;
+      if(data[i] < 40) cleared++;
+    }
+    if(total > 0 && cleared/total > 0.45){
+      revealed = true;
+      canvas.style.opacity = '0';
+      hint.style.opacity = '0';
+    }
+  }
+
+  let drawing = false;
+  function start(e){ drawing = true; const p = getPos(e); scratchAt(p.x,p.y); }
+  function move(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    scratchAt(p.x,p.y);
+    checkCleared();
+  }
+  function end(){ drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:true});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+})();
+</script>
+</body>
+</html>

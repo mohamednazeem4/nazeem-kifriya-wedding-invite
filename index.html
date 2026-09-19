@@ -200,9 +200,9 @@ img{max-width:100%}
 .glass-card.reveal,.glass-card-light.reveal{transition:opacity .9s ease,transform .9s var(--ease-fluid),border-color .4s ease,box-shadow .4s ease}
 
 /* ================= ENTRANCE ================= */
-.entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;transition:opacity .9s cubic-bezier(.25,.6,.3,1),visibility .9s linear}
+.entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;touch-action:none;overscroll-behavior:none;transition:opacity .9s cubic-bezier(.25,.6,.3,1),visibility .9s linear}
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden}
+.entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
 .entrance-video{width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
 .entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
 .entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
@@ -470,12 +470,37 @@ section { transition: transform .8s ease, opacity .8s ease; }
 
 <div class="entrance" id="entrance">
   <div class="entrance-stage" id="envelope" role="button" tabindex="0" aria-label="Touch to open wedding invitation">
-    <video class="entrance-video" id="entranceVideo" poster="assets/entrance-video-poster.jpg" playsinline preload="auto">
-      <source src="assets/entrance-video-mobile.mp4" media="(max-width: 650px)" type="video/mp4">
-      <source src="assets/entrance-video.mp4" type="video/mp4">
-    </video>
+    <video class="entrance-video" id="entranceVideo" playsinline preload="auto"
+           data-src-mobile="assets/entrance-video-mobile.mp4"
+           data-src-desktop="assets/entrance-video.mp4"
+           data-poster-mobile="assets/entrance-video-poster-mobile.jpg"
+           data-poster-desktop="assets/entrance-video-poster.jpg"></video>
   </div>
 </div>
+
+<!-- Entrance media picker. Phones (max-width:650px, the same breakpoint as the CSS) get the 9:16 video + 9:16 poster,
+     everything else gets the original 16:9 video + poster. <source media="..."> is unreliable on <video> and is only
+     read once, so it is chosen here instead. If the screen changes class BEFORE the guest taps (e.g. rotating a phone),
+     it switches; once playback has started it never swaps. Runs straight after the <video> so nothing loads twice. -->
+<script>
+(function () {
+  var v = document.getElementById('entranceVideo');
+  if (!v || !window.matchMedia) return;
+  var mq = window.matchMedia('(max-width: 650px)');
+  var current = '';
+  function pick() {
+    if (current && (!v.paused || v.currentTime > 0 || v.ended)) return;   // already started: leave it alone
+    var kind = mq.matches ? 'mobile' : 'desktop';
+    if (kind === current) return;
+    current = kind;
+    v.poster = v.getAttribute('data-poster-' + kind);
+    v.src    = v.getAttribute('data-src-' + kind);
+  }
+  pick();
+  if (mq.addEventListener) mq.addEventListener('change', pick);
+  else if (mq.addListener) mq.addListener(pick);                          // older Safari
+})();
+</script>
 
 <section class="opening" id="home">
   <!-- BOKEH CANVAS -->
@@ -579,7 +604,10 @@ section { transition: transform .8s ease, opacity .8s ease; }
     <div class="venue-address">17 Balfour Road, behind CSI BAIN Matric Higher Secondary School,<br>Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India</div>
     <div class="location-wrap">
       <div class="qr">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NxgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA8MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" alt="Exact venue location QR code">
+        <!-- QR is a local file (no third-party service). It encodes the venue link:
+             https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877
+             If the venue ever changes, the QR must be regenerated. -->
+        <img src="assets/venue-qr.svg" alt="Exact venue location QR code">
         <div class="qr-label">SCAN FOR LOCATION</div>
       </div>
       <div>
@@ -888,6 +916,9 @@ const entrance = document.getElementById("entrance");
 
 function openInvitation(){
   if(entrance.classList.contains("entering")) return;
+  // The guest may have scrolled the page behind the overlay (wheel / keyboard / browser scroll-restore): always land on the hero.
+  // "instant" overrides html{scroll-behavior:smooth}, so it jumps instead of gliding while the overlay dissolves.
+  try{ window.scrollTo({top:0, left:0, behavior:"instant"}); }catch(_){ window.scrollTo(0,0); }
   entrance.classList.add("entering", "hidden");  // video eases out while the whole overlay dissolves...
   document.body.classList.add("opened");         // ...and the hero text fades in at the same moment
 }

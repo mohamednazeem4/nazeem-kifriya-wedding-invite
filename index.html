@@ -25,10 +25,21 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--dark);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:300}
+body{margin:0;background:var(--dark);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:300;position:relative}
 section{position:relative;overflow:hidden}
 button,a{font:inherit}
 img{max-width:100%}
+
+/* Global Ambient Overlay Canvas (Bokeh + Leaves across entire page) */
+#globalAmbientCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 8999;
+  mix-blend-mode: screen;
+}
 
 /* ---------- STICKY QUICK-NAV BAR ---------- */
 .quick-nav {
@@ -209,7 +220,16 @@ h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1
 
 /* ================= COUNTDOWN ================= */
 .countdown{background:linear-gradient(135deg,#2a1219,#542431);text-align:center;padding:110px 20px 90px;display:flex;flex-direction:column;justify-content:center;min-height:60svh;position:relative}
-.countdown h2{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:46px;color:#fff0e7;margin:0 0 35px}
+.countdown h2{
+  font-family:"Cormorant Garamond", serif;
+  font-weight:300;
+  font-size:clamp(18px,4.5vw,30px);
+  color:#fff0e7;
+  margin:0 0 35px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 .timer{display:grid;grid-template-columns:repeat(4,1fr);max-width:760px;width:100%;margin:auto;gap:16px}
 .tbox{
   padding:22px 10px;
@@ -246,7 +266,7 @@ h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1
   transform: scale(1.03);
   background: rgba(213, 173, 103, 0.08);
 }
-.t-time{font-family:"Cormorant Garamond", serif;font-size:20px;color:var(--text);text-align:right;padding-right:12px;font-weight:500}
+.t-time{font-family:"Bickham Script Pro", serif;font-size:20px;color:var(--text);text-align:right;padding-right:12px;font-weight:500}
 .t-label{font-size:18px;font-weight:600;letter-spacing:.03em;color:var(--text-soft);text-align:left;padding-left:12px;line-height:1.4}
 .t-mark{position:relative;display:flex;align-items:center;justify-content:center}
 .t-mark .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);transition: transform 0.3s var(--ease-fluid);}
@@ -269,8 +289,29 @@ h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1
 .dua{background:radial-gradient(circle at 50% 25%,rgba(213,173,103,.2),transparent 55%),linear-gradient(160deg,#1b0e13,#3a1720 60%,#160b0f);color:var(--ink);display:grid;place-items:center;text-align:center;padding:110px 24px 90px;min-height:82svh;position:relative}
 .dua-inner{max-width:680px;padding:48px 32px}
 .dua .kicker{font-size:13px}
-.dua h2{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(34px,6vw,52px);color:#fff0e7;margin:14px 0 22px}
-.dua-arabic{font-family:'Scheherazade New','Cormorant Garamond',serif;direction:rtl;unicode-bidi:isolate;font-size:clamp(18px,3.8vw,27px);line-height:2.2;color:var(--gold-soft);white-space:normal;max-width:100%;margin:20px auto 22px}
+.dua h2{
+  font-family:"Cormorant Garamond", serif;
+  font-weight:300;
+  font-size:clamp(20px,5vw,40px);
+  color:#fff0e7;
+  margin:14px 0 22px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dua-arabic{
+  font-family:'Scheherazade New','Cormorant Garamond',serif;
+  direction:rtl;
+  unicode-bidi:isolate;
+  font-size:clamp(13px,3.2vw,27px);
+  line-height:2.2;
+  color:var(--gold-soft);
+  white-space:nowrap;
+  max-width:100%;
+  margin:20px auto 22px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 .dua-translit{font-family:'Cormorant Garamond', serif;font-style:italic;font-size:clamp(16px,3vw,19px);color:#cdb7ae;line-height:1.6;margin:0 0 20px}
 .dua-translation{font-family:'Cormorant Garamond', serif;font-size:clamp(18px,3.6vw,22px);line-height:1.75;color:#fff0e7;max-width:30em;margin:0 auto}
 
@@ -288,9 +329,78 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
  .quick-nav-links a { font-size: 9.5px; letter-spacing: 1px; }
  .quick-nav-brand { font-size: 15px; letter-spacing: 2px; }
 }
+
+/* PREMIUM POLISH — additive only */
+html { scroll-behavior: smooth; }
+body { overflow-x: hidden; }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7998;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,.055), transparent 24%),
+    radial-gradient(circle at 85% 35%, rgba(212,175,55,.045), transparent 26%),
+    radial-gradient(circle at 50% 90%, rgba(255,255,255,.035), transparent 30%);
+  mix-blend-mode: screen;
+}
+
+section {
+  isolation: isolate;
+  transition: transform .8s ease, opacity .8s ease;
+}
+
+.glass-card, .glass-card-light {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::after, .glass-card-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255,255,255,.10), transparent 22%),
+    linear-gradient(115deg, transparent 25%, rgba(255,255,255,.045) 50%, transparent 75%);
+  opacity: .65;
+  transform: translateX(-18%);
+  animation: premiumSheen 9s ease-in-out infinite;
+}
+
+@keyframes premiumSheen {
+  0%, 65%, 100% { transform: translateX(-18%); opacity: .18; }
+  75% { transform: translateX(18%); opacity: .65; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .glass-card, .glass-card-light {
+    transition: transform .45s ease, box-shadow .45s ease, border-color .45s ease;
+  }
+  .glass-card:hover, .glass-card-light:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 600px) {
+  html, body { width: 100%; max-width: 100%; }
+  video, iframe, canvas, img { max-width: 100%; }
+  .glass-card, .glass-card-light { max-width: calc(100vw - 28px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .glass-card::after, .glass-card-light::after { animation: none; }
+}
+
 </style>
 </head>
 <body>
+
+<!-- GLOBAL AMBIENT OVERLAY CANVAS (BOKEH + LEAF DRIFT OVER ENTIRE PAGE & BOXES) -->
+<canvas id="globalAmbientCanvas"></canvas>
 
 <!-- STICKY QUICK-NAVIGATION BAR -->
 <nav class="quick-nav" id="quickNav">
@@ -328,7 +438,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
   <canvas id="introCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="intro-inner glass-card-light reveal">
     <div class="flower">✦</div>
-    <p style="font-size: 12px; letter-spacing: 3px; font-family: Montserrat, sans-serif;">WITH JOY IN OUR HEARTS</p>
+    <p style="font-size: 16px; letter-spacing: 3px; font-family: Montserrat, sans-serif;">WITH JOY IN OUR HEARTS</p>
     <h2>Together with our families,<br>we invite you to<br>celebrate with us.</h2>
     <p>As we begin a beautiful new chapter together, your presence would make our celebration even more meaningful.</p>
   </div>
@@ -338,7 +448,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
   <canvas id="revealCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="reveal">
     <h2>OUR DATE DROP</h2>
-    <p style="font-size: 14px; letter-spacing: 2px; font-family: Montserrat, sans-serif; text-transform: uppercase;">SAVE IT, DON'T MISS IT</p>
+    <p style="font-size: 16px; letter-spacing: 2px; font-family: Montserrat, sans-serif; text-transform: uppercase;">SAVE IT, DON'T MISS IT</p>
     <p style="font-family:'Cormorant Garamond', serif;font-size:22px;color:var(--text-soft)">Scratch the heart below to uncover our wedding date.</p>
     <div class="scratch-stage" id="scratchStage">
       <canvas id="scratchEffectCanvas"></canvas>
@@ -357,7 +467,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
 <section class="countdown">
   <canvas id="countdownBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="reveal">
-    <div class="kicker" style="color:var(--gold); margin-bottom: 20px; font-size: 12px;">THE BIG DAY IS COMING</div>
+    <div class="kicker" style="color:var(--gold); margin-bottom: 20px; font-size: 16px;">THE BIG DAY IS COMING</div>
     <h2>Counting down to forever</h2>
     <div class="timer">
       <div class="tbox"><span class="tnum" id="d">--</span><span class="tlabel">DAYS</span></div>
@@ -371,7 +481,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
 <section class="schedule" id="schedule">
   <canvas id="scheduleCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="schedule-inner glass-card-light reveal">
-    <p style="font-size: 12px; letter-spacing: 3px; font-family: Montserrat, sans-serif;">THE CELEBRATION</p>
+    <p style="font-size: 20px; letter-spacing: 3px; font-family: Montserrat, sans-serif;">THE CELEBRATION</p>
     <h2>Order of the day</h2>
     <p style="font-family:'Cormorant Garamond', serif; font-size:20px; font-weight:600; color:var(--text-soft)">Saturday, 26th December 2026</p>
     <div class="timeline">
@@ -412,13 +522,13 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
     <div class="venue-address">17 Balfour Road, behind CSI BAIN Matric Higher Secondary School,<br>Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India</div>
     <div class="location-wrap">
       <div class="qr">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NjgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxMzQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA4MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" alt="Exact venue location QR code">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NxgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA8MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" alt="Exact venue location QR code">
         <div class="qr-label">SCAN FOR LOCATION</div>
       </div>
       <div>
         <div class="kicker" style="color:var(--gold); font-size: 12px;">EXACT LOCATION</div>
         <p style="line-height:1.8;opacity:.8;font-size:14px">Scan the QR code or tap below to open the exact venue location in Google Maps.</p>
-        <a class="map-button" href="https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NjgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxMzQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA4MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" target="_blank" rel="noopener">OPEN IN GOOGLE MAPS ↗</a>
+        <a class="map-button" href="https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NxgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA8MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" target="_blank" rel="noopener">OPEN IN GOOGLE MAPS ↗</a>
       </div>
     </div>
   </div>
@@ -428,7 +538,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
   <canvas id="duaBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="dua-inner glass-card reveal">
     <div class="flower">☾</div>
-    <div class="kicker" style="color:var(--gold);font-size: 12px;">A PRAYER FOR US</div>
+    <div class="kicker" style="color:var(--gold);font-size: 16px;">A PRAYER FOR US</div>
     <h2>Dua for the Newly Wed</h2>
     <p class="dua-arabic" dir="rtl" lang="ar">بَارَكَ اللّٰهُ لَكَ وَبَارَكَ عَلَيْكَ وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ</p>
     <p class="dua-translit">Baarakallaahu laka wa baaraka 'alayka wa jama'a baynakumaa fee khayr.</p>
@@ -440,7 +550,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
   <canvas id="closingCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="reveal">
     <div class="flower">❦</div>
-    <div class="kicker" style="font-size: 12px;">WITH LOVE</div>
+    <div class="kicker" style="font-size: 20px;">WITH LOVE</div>
     <h2>Mohamed Nazeem<br><span class="amp" style="font-size:.7em;color:#b88932">&amp;</span><br>Kifriya Muqsin</h2>
     <p>We look forward to sharing our special day with you.</p>
     <div class="initials">N · K</div>
@@ -449,6 +559,121 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size
 <footer>26 · 12 · 2026 &nbsp; | &nbsp; MOHAMED NAZEEM &amp; KIFRIYA MUQSIN</footer>
 
 <script>
+// ---------- GLOBAL OVERLAY: BOKEH & LEAF DRIFT EFFECT ----------
+(function initGlobalAmbient() {
+  const canvas = document.getElementById('globalAmbientCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let width, height;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Floating Bokeh Particle Class (Scattered across full viewport)
+  class BokehParticle {
+    constructor() {
+      this.reset(true);
+    }
+    reset(initial = false) {
+      this.x = Math.random() * width;
+      this.y = initial ? Math.random() * height : height + Math.random() * 20; // Distribute across entire initial page height
+      this.radius = Math.random() * 7 + 3;
+      this.speedY = Math.random() * 0.4 + 0.15;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.maxOpacity = Math.random() * 0.5 + 0.18;
+      this.opacity = initial ? Math.random() * this.maxOpacity : 0;
+      this.fadeSpeed = Math.random() * 0.006 + 0.002;
+      this.fadingIn = initial ? Math.random() > 0.5 : true;
+      const palette = ['213, 173, 103', '233, 207, 160', '255, 240, 231', '212, 163, 89'];
+      this.color = palette[Math.floor(Math.random() * palette.length)];
+    }
+    update() {
+      this.y -= this.speedY;
+      this.x += this.speedX;
+
+      if (this.fadingIn) {
+        this.opacity += this.fadeSpeed;
+        if (this.opacity >= this.maxOpacity) this.fadingIn = false;
+      } else {
+        this.opacity -= this.fadeSpeed * 0.7;
+      }
+
+      if (this.y < -20 || this.opacity <= 0) {
+        this.reset();
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+      grad.addColorStop(0, `rgba(${this.color}, ${this.opacity})`);
+      grad.addColorStop(0.6, `rgba(${this.color}, ${this.opacity * 0.35})`);
+      grad.addColorStop(1, `rgba(${this.color}, 0)`);
+      ctx.fillStyle = grad;
+      ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Floating Leaf / Petal Particle Class
+  class LeafParticle {
+    constructor() {
+      this.reset(true);
+    }
+    reset(initial = false) {
+      this.x = Math.random() * width;
+      this.y = initial ? Math.random() * height : -30;
+      this.size = Math.random() * 7 + 4;
+      this.speedY = Math.random() * 0.6 + 0.3;
+      this.speedX = Math.random() * 0.4 - 0.2;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.025;
+      this.opacity = Math.random() * 0.35 + 0.2;
+      this.swaySpeed = Math.random() * 0.02 + 0.01;
+      this.swayOffset = Math.random() * Math.PI * 2;
+      const palette = ['180, 140, 75', '213, 173, 103', '141, 64, 81', '195, 150, 90'];
+      this.color = palette[Math.floor(Math.random() * palette.length)];
+    }
+    update() {
+      this.y += this.speedY;
+      this.x += Math.sin(this.y * this.swaySpeed + this.swayOffset) * 0.6 + this.speedX;
+      this.rotation += this.rotSpeed;
+      if (this.y > height + 30) {
+        this.reset();
+      }
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+      ctx.beginPath();
+      // Organic leaf shape using quadratic curves
+      ctx.moveTo(0, -this.size);
+      ctx.quadraticCurveTo(this.size * 0.8, -this.size * 0.2, 0, this.size);
+      ctx.quadraticCurveTo(-this.size * 0.8, -this.size * 0.2, 0, -this.size);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  const bokehCount = Math.min(Math.floor(window.innerWidth / 14), 70);
+  const leafCount = Math.min(Math.floor(window.innerWidth / 25), 30);
+  const bokehParticles = Array.from({ length: bokehCount }, () => new BokehParticle());
+  const leafParticles = Array.from({ length: leafCount }, () => new LeafParticle());
+
+  function animateGlobal() {
+    ctx.clearRect(0, 0, width, height);
+    bokehParticles.forEach(p => { p.update(); p.draw(); });
+    leafParticles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateGlobal);
+  }
+  animateGlobal();
+})();
+
 // ---------- MULTI-SECTION BOKEH EFFECT ENGINE (DARK PAGES) ----------
 function initBokehEffect(canvasId, palette = ['213, 173, 103', '233, 207, 160', '255, 240, 231']) {
   const canvas = document.getElementById(canvasId);
@@ -471,14 +696,14 @@ function initBokehEffect(canvasId, palette = ['213, 173, 103', '233, 207, 160', 
     }
     reset(initial = false){
       this.x = Math.random() * width;
-      this.y = initial ? Math.random() * height : height + Math.random() * 20;
+      this.y = initial ? Math.random() * height : height + Math.random() * 15; // Full section height spawn
       this.radius = Math.random() * 4 + 1;
       this.speedY = Math.random() * 0.4 + 0.15;
       this.speedX = (Math.random() - 0.5) * 0.25;
       this.maxOpacity = Math.random() * 0.5 + 0.2;
-      this.opacity = 0;
+      this.opacity = initial ? Math.random() * this.maxOpacity : 0;
       this.fadeSpeed = Math.random() * 0.008 + 0.003;
-      this.fadingIn = true;
+      this.fadingIn = initial ? Math.random() > 0.5 : true;
       this.color = palette[Math.floor(Math.random() * palette.length)];
     }
     update(){
@@ -558,7 +783,9 @@ function initPetalEffect(canvasId) {
       this.y += this.speedY;
       this.x += Math.sin(this.y * 0.015) * 0.5 + this.speedX;
       this.rotation += this.rotSpeed;
-      if (this.y > height + 20) this.reset();
+      if (this.y > height + 20) {
+        this.reset();
+      }
     }
     draw(){
       ctx.save();
@@ -865,5 +1092,33 @@ window.addEventListener('scroll', () => {
   canvas.addEventListener('touchend', end);
 })();
 </script>
+
+<script>
+/* PREMIUM POLISH — subtle scroll reveal, disabled when reduced motion is requested */
+(function () {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!('IntersectionObserver' in window)) return;
+
+  var targets = document.querySelectorAll('section');
+  targets.forEach(function (el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity .8s ease, transform .8s ease';
+  });
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  targets.forEach(function (el) { observer.observe(el); });
+})();
+</script>
+
 </body>
 </html>

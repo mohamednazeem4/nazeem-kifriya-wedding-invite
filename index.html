@@ -76,6 +76,7 @@ img{max-width:100%}
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(213, 173, 103, 0.2);
   padding: 12px 20px;
+  --u: 1; /* nav scale: 1 = full size; the fit script lowers it only when the screen is too narrow */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -83,14 +84,18 @@ img{max-width:100%}
 }
 .quick-nav-brand {
   font-family: "Cormorant Garamond", serif;
-  font-size: 18px;
-  letter-spacing: 3px;
+  font-size: calc(18px * var(--u));
+  letter-spacing: calc(3px * var(--u));
   color: var(--gold);
   text-decoration: none;
+  white-space: nowrap;
+  flex: none;
 }
 .quick-nav-links {
   display: flex;
-  gap: 16px;
+  gap: calc(16px * var(--u));
+  flex: none;
+  white-space: nowrap;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -98,8 +103,8 @@ img{max-width:100%}
 .quick-nav-links a {
   color: var(--ink);
   text-decoration: none;
-  font-size: 12px;
-  letter-spacing: 1.5px;
+  font-size: calc(12px * var(--u));
+  letter-spacing: calc(1.5px * var(--u));
   text-transform: uppercase;
   opacity: 0.7;
   transition: opacity 0.3s ease, color 0.3s ease, transform 0.3s var(--ease-fluid);
@@ -195,15 +200,27 @@ img{max-width:100%}
 .glass-card.reveal,.glass-card-light.reveal{transition:opacity .9s ease,transform .9s var(--ease-fluid),border-color .4s ease,box-shadow .4s ease}
 
 /* ================= ENTRANCE ================= */
-.entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;transition:opacity .95s ease,visibility .95s ease}
+.entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;transition:opacity .9s cubic-bezier(.25,.6,.3,1),visibility .9s linear}
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden}
 .entrance-video{width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
 .entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
 .entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
 .entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video{transform:scale(1.01)}
-.entrance.entering .entrance-video{transform:scale(1.11);filter:blur(2px) brightness(1.12);opacity:0}
-@media(max-width:650px){.entrance-stage:after{inset:5px}}
+/* the video no longer fades to black on its own - the whole overlay dissolves into the hero instead (no dark gap) */
+.entrance.entering .entrance-video{transform:scale(1.07);filter:blur(6px) brightness(1.15)}
+@media(max-width:650px){
+  .entrance-stage:after{inset:5px}
+  /* Phone entrance video: use the dedicated portrait 9:16 file and fill the screen. */
+  .entrance-video{
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    object-fit:cover;
+    object-position:center;
+  }
+}
 
 /* ================= HERO ================= */
 .opening{min-height:100svh;display:grid;place-items:center;text-align:center;padding-bottom:13vh;padding-top:60px;background:
@@ -216,11 +233,12 @@ linear-gradient(145deg,#1b0e13,#4a202b 55%,#160b0f);position:relative}
 .bismillah{font-family:'Cormorant Garamond','Scheherazade New',serif;font-size:clamp(22px,4.6vw,30px);color:var(--gold-soft);letter-spacing:.01em;line-height:1.6;opacity:0;margin-bottom:16px}
 .monogram{font-family:"Cormorant Garamond", serif;font-size:clamp(22px,4.5vw,30px);letter-spacing:8px;color:var(--gold);opacity:0}
 h1{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(30px,10.5vw,96px);line-height:.86;margin:22px 0;color:#fff0e7;opacity:0}
-/* Hero text rises in only after the invitation is opened (body.opened is added by the entrance script),
-   so people actually see the animation instead of it finishing behind the overlay. */
-body.opened .bismillah{animation:rise 1.1s .1s forwards}
-body.opened .monogram{animation:rise 1.2s .2s forwards}
-body.opened h1{animation:rise 1.3s .7s forwards}
+/* Hero text fades in only once the invitation is opening (body.opened), timed to overlap the overlay's dissolve
+   so the video's final frame melts straight into the hero with no empty pause. */
+@keyframes heroIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+body.opened .bismillah{animation:heroIn 1.1s .22s ease-out forwards}
+body.opened .monogram{animation:heroIn 1.1s .3s ease-out forwards}
+body.opened h1{animation:heroIn 1.2s .38s ease-out forwards}
 h1 .name-line{display:block;white-space:nowrap}
 h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1em 0}
 .scrollhint{position:absolute;bottom:22px;font-size:13px;font-weight:500;letter-spacing:3px;opacity:.65;z-index:2}
@@ -312,7 +330,7 @@ section p.label--lg{font-size:20px}
   transform: scale(1.03);
   background: rgba(213, 173, 103, 0.08);
 }
-.t-time{font-family:"Bickham Script Pro", serif;font-size:26px;line-height:1.1;color:var(--text);text-align:right;padding-right:12px;font-weight:400}
+.t-time{font-family:"Bickham Script Pro", serif;font-size:20px;line-height:1.1;color:var(--text);text-align:right;padding-right:12px;font-weight:400}
 .t-label{font-size:18px;font-weight:500;letter-spacing:.03em;color:var(--text-soft);text-align:left;padding-left:12px;line-height:1.4}
 .t-mark{position:relative;display:flex;align-items:center;justify-content:center}
 .t-mark .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);transition: transform 0.3s var(--ease-fluid);}
@@ -363,23 +381,20 @@ section p.label--lg{font-size:20px}
 .closing h2{font-size:52px}
 .initials{font-family:"Cormorant Garamond", serif;font-size:40px;letter-spacing:9px;color:var(--gold-deep);margin-top:35px}
 .closing .amp{font-size:.7em;color:var(--gold-deep)}
-footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px;font-size:12px;letter-spacing:3px;position:relative;z-index:2}
+footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px clamp(10px,3vw,25px);font-size:12px;letter-spacing:.25em;position:relative;z-index:2}
+.foot-line{display:inline-block;white-space:nowrap}
 
 @media(max-width:650px){
  .timer{grid-template-columns:repeat(2,1fr);max-width:340px}
  .location-wrap{grid-template-columns:1fr;text-align:center;justify-items:center}
  .venue-address br{display:none}
  .quick-nav { padding: 12px 12px; }
- .quick-nav-links { gap: 8px; }
- .quick-nav-links a { font-size: 11px; letter-spacing: .3px; }
- .quick-nav-brand { font-size: 14px; letter-spacing: 1px; }
+ .quick-nav-links { gap: calc(8px * var(--u)); }
+ .quick-nav-links a { font-size: calc(11px * var(--u)); letter-spacing: calc(.3px * var(--u)); }
+ .quick-nav-brand { font-size: calc(14px * var(--u)); letter-spacing: calc(1px * var(--u)); }
  /* more room for the one-line Arabic dua */
  .dua { padding-left: 14px; padding-right: 14px; }
  .dua-inner { padding: 40px 14px; }
-}
-@media(max-width:359px){
- .quick-nav-brand { display: none; }
- .quick-nav { justify-content: center; }
 }
 
 /* ================= AMBIENT POLISH ================= */
@@ -455,7 +470,10 @@ section { transition: transform .8s ease, opacity .8s ease; }
 
 <div class="entrance" id="entrance">
   <div class="entrance-stage" id="envelope" role="button" tabindex="0" aria-label="Touch to open wedding invitation">
-    <video class="entrance-video" id="entranceVideo" src="assets/entrance-video.mp4" poster="assets/entrance-video-poster.jpg" playsinline preload="auto"></video>
+    <video class="entrance-video" id="entranceVideo" poster="assets/entrance-video-poster.jpg" playsinline preload="auto">
+      <source src="assets/entrance-video-mobile.mp4" media="(max-width: 650px)" type="video/mp4">
+      <source src="assets/entrance-video.mp4" type="video/mp4">
+    </video>
   </div>
 </div>
 
@@ -595,7 +613,7 @@ section { transition: transform .8s ease, opacity .8s ease; }
     <div class="initials">N · K</div>
   </div>
 </section>
-<footer>MOHAMED NAZEEM &amp; KIFRIYA MUQSIN &nbsp; | &nbsp; 26 · 12 · 2026</footer>
+<footer><span class="foot-line">MOHAMED NAZEEM &amp; KIFRIYA MUQSIN &nbsp; | &nbsp; 26 · 12 · 2026</span></footer>
 
 <script>
 // ---------- GLOBAL OVERLAY: BOKEH & LEAF DRIFT EFFECT ----------
@@ -870,12 +888,19 @@ const entrance = document.getElementById("entrance");
 
 function openInvitation(){
   if(entrance.classList.contains("entering")) return;
-  entrance.classList.add("entering");            // video zooms, blurs and fades out
-  setTimeout(() => {
-    entrance.classList.add("hidden");            // overlay fades away...
-    document.body.classList.add("opened");       // ...and the hero text rises in at the same moment
-  }, 900);
+  entrance.classList.add("entering", "hidden");  // video eases out while the whole overlay dissolves...
+  document.body.classList.add("opened");         // ...and the hero text fades in at the same moment
 }
+
+// Start the dissolve a fraction of a second BEFORE the video's last frame, so there is no dead time after it ends.
+const DISSOLVE_LEAD = 0.4;   // seconds before the end (raise for an earlier start, 0 = exactly at the end)
+function watchForVideoEnd(){
+  if(entrance.classList.contains("entering")) return;
+  const d = entranceVideo.duration;
+  if(isFinite(d) && d > DISSOLVE_LEAD && entranceVideo.currentTime >= d - DISSOLVE_LEAD){ openInvitation(); return; }
+  requestAnimationFrame(watchForVideoEnd);
+}
+entranceVideo.addEventListener("play", () => requestAnimationFrame(watchForVideoEnd));
 
 function startEntrance(){
   if(!entranceVideo.paused) return;
@@ -997,6 +1022,80 @@ remeasure();
   if (document.fonts){
     if (document.fonts.ready) document.fonts.ready.then(schedule);
     if (document.fonts.load) document.fonts.load('27px "Scheherazade New"', text.textContent).then(schedule).catch(function(){});
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
+  }
+})();
+
+// ---------- NAV: brand + all links always visible on ONE row ----------
+// At full size when there is room; on narrow screens everything (text, spacing, gaps) scales down together.
+(function fitNav(){
+  const nav = document.getElementById('quickNav');
+  const brand = nav && nav.querySelector('.quick-nav-brand');
+  const links = nav && nav.querySelector('.quick-nav-links');
+  if (!nav || !brand || !links) return;
+
+  const MIN_SCALE = 0.45, GAP = 8;   // GAP = minimum space kept between brand and links
+  let queued = false;
+
+  function fit(){
+    queued = false;
+    nav.style.setProperty('--u', '1');                    // measure at full size
+    const cs = getComputedStyle(nav);
+    const room = nav.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const need = brand.offsetWidth + links.offsetWidth + GAP;
+    if (!room || !need) return;
+    const u = Math.max(MIN_SCALE, Math.min(1, (room / need) * 0.98));
+    nav.style.setProperty('--u', u.toFixed(3));
+  }
+  function schedule(){ if (!queued){ queued = true; requestAnimationFrame(fit); } }
+
+  fit();
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', schedule);
+  if (document.fonts){
+    if (document.fonts.ready) document.fonts.ready.then(schedule);
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
+  }
+})();
+
+// ---------- FOOTER: one line on every screen ----------
+// Full size (12px, wide letter-spacing) when there is room. Otherwise the letter-spacing tightens first,
+// and only then does the font shrink, so the line keeps a refined look for as long as possible.
+(function fitFooterToOneLine(){
+  const footer = document.querySelector('footer');
+  const text = footer && footer.querySelector('.foot-line');
+  if (!footer || !text) return;
+
+  const MAX_FONT = 12, MAX_LS = 0.25, MIN_LS = 0.06, MIN_FONT = 6;
+  let queued = false;
+
+  function fit(){
+    queued = false;
+    footer.style.fontSize = '100px';
+    footer.style.letterSpacing = '0px';
+    const glyphs = text.offsetWidth / 100;                 // width of the text per 1px of font size, no spacing
+    const n = text.textContent.length;                     // letter-spacing is added after every character
+    const cs = getComputedStyle(footer);
+    const room = footer.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (!glyphs || !room) return;
+
+    let font = MAX_FONT, ls = MAX_LS;
+    if (font * (glyphs + n * ls) > room){                  // 1) tighten the spacing
+      ls = Math.max(MIN_LS, (room / font - glyphs) / n);
+      if (font * (glyphs + n * ls) > room){                // 2) then shrink the font
+        font = Math.max(MIN_FONT, room / (glyphs + n * ls));
+      }
+    }
+    footer.style.fontSize = (font * 0.99).toFixed(2) + 'px';
+    footer.style.letterSpacing = ls.toFixed(3) + 'em';
+  }
+  function schedule(){ if (!queued){ queued = true; requestAnimationFrame(fit); } }
+
+  fit();
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', schedule);
+  if (document.fonts){
+    if (document.fonts.ready) document.fonts.ready.then(schedule);
     if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
   }
 })();

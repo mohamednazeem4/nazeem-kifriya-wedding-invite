@@ -431,6 +431,16 @@ section { transition: transform .8s ease, opacity .8s ease; }
   75% { transform: translateX(18%); opacity: .65; }
 }
 
+/* iPhone "page slides left / blank strip on the right" fix.
+   The sheen above sweeps up to 18% past a card's right edge. A transformed box counts as scrollable overflow, so for about a
+   second of every 9s cycle the page was ~50px wider than the screen. Chrome hides that (body{overflow-x:hidden}); iPhone Safari
+   does not - it zooms out / lets the page drift sideways. Clip the sheen to its card (it also stops the glow leaking past the
+   rounded corners). */
+.glass-card, .glass-card-light { overflow: hidden; }
+/* Safety net: nothing inside a section may ever widen the page. "clip" makes no scroll container and only clips sideways;
+   browsers that don't know it (iOS < 16) ignore it and rely on the rule above. */
+section { overflow-x: clip; }
+
 @media (prefers-reduced-motion: no-preference) {
   .glass-card:hover, .glass-card-light:hover { transform: translateY(-2px); }
 }

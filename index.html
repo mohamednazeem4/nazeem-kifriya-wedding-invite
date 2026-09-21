@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="Nazeem &amp; Kifriya — Wedding Invitation">
 <meta property="og:title" content="Mohamed Nazeem &amp; Kifriya Muqsin — Wedding Invitation">
 <meta property="og:description" content="Together with our families, we invite you to celebrate our wedding — 26 December 2026, Chennai.">
-<meta property="og:image" content="https://github.com/mohamednazeem4/nazeem-kifriya-wedding-invite/blob/main/assets/og-image.jpg">
+<meta property="og:image" content="https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/assets/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
@@ -203,16 +203,19 @@ img{max-width:100%}
 .entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;touch-action:none;overscroll-behavior:none;transition:opacity .9s cubic-bezier(.25,.6,.3,1),visibility .9s linear}
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
-.entrance-video{width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
+.entrance-video,.entrance-poster{grid-area:1/1;width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
+/* Poster overlay: sits on top of the <video> and stays until real video frames are on screen, so the tap never shows a black gap. */
+.entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:transform 1.15s cubic-bezier(.16,.8,.2,1),opacity .35s ease}
+.entrance.video-live .entrance-poster{opacity:0}
 .entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
 .entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
-.entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video{transform:scale(1.01)}
+.entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video,.entrance-stage:hover .entrance-poster,.entrance-stage:focus .entrance-poster{transform:scale(1.01)}
 /* the video no longer fades to black on its own - the whole overlay dissolves into the hero instead (no dark gap) */
-.entrance.entering .entrance-video{transform:scale(1.07);filter:blur(6px) brightness(1.15)}
+.entrance.entering .entrance-video,.entrance.entering .entrance-poster{transform:scale(1.07);filter:blur(6px) brightness(1.15)}
 @media(max-width:650px){
   .entrance-stage:after{inset:5px}
   /* Phone entrance video: use the dedicated portrait 9:16 file and fill the screen. */
-  .entrance-video{
+  .entrance-video,.entrance-poster{
     width:100%;
     height:100%;
     max-width:none;
@@ -493,6 +496,7 @@ section { overflow-x: clip; }
            data-src-desktop="assets/entrance-video.mp4"
            data-poster-mobile="assets/entrance-video-poster-mobile.jpg"
            data-poster-desktop="assets/entrance-video-poster.jpg"></video>
+    <img class="entrance-poster" id="entrancePoster" alt="" aria-hidden="true" decoding="async" fetchpriority="high" draggable="false">
   </div>
 </div>
 
@@ -503,16 +507,22 @@ section { overflow-x: clip; }
 <script>
 (function () {
   var v = document.getElementById('entranceVideo');
+  var p = document.getElementById('entrancePoster');
   if (!v || !window.matchMedia) return;
   var mq = window.matchMedia('(max-width: 650px)');
   var current = '';
+  var began = false;
+  v.addEventListener('play', function () { began = true; });
   function pick() {
-    if (current && (!v.paused || v.currentTime > 0 || v.ended)) return;   // already started: leave it alone
+    if (current && (began || !v.paused || v.ended)) return;                 // already started: leave it alone
     var kind = mq.matches ? 'mobile' : 'desktop';
     if (kind === current) return;
     current = kind;
-    v.poster = v.getAttribute('data-poster-' + kind);
-    v.src    = v.getAttribute('data-src-' + kind);
+    var posterUrl = v.getAttribute('data-poster-' + kind);
+    v.poster = posterUrl;
+    if (p) p.src = posterUrl;                                               // poster overlay (same file, loaded once)
+    // "#t=0.001" makes phones (iOS Safari especially) fetch + decode the FIRST frame up front, so the tap doesn't start from a cold decoder.
+    v.src = v.getAttribute('data-src-' + kind) + '#t=0.001';
   }
   pick();
   if (mq.addEventListener) mq.addEventListener('change', pick);
@@ -970,6 +980,26 @@ function watchForVideoEnd(){
   requestAnimationFrame(watchForVideoEnd);
 }
 entranceVideo.addEventListener("play", () => requestAnimationFrame(watchForVideoEnd));
+
+// Hold the poster on screen until the video is genuinely painting frames, then cross-fade to it.
+// This hides the buffering / decoder start-up gap that phones otherwise show as a black screen.
+let videoLive = false;
+function showVideo(){
+  if(videoLive) return;
+  videoLive = true;
+  entrance.classList.add("video-live");
+}
+function waitForFirstFrames(){
+  if(videoLive) return;
+  if("requestVideoFrameCallback" in entranceVideo){
+    entranceVideo.requestVideoFrameCallback((now, meta) => {
+      if(meta.mediaTime > 0.02) showVideo(); else waitForFirstFrames();
+    });
+  }
+}
+entranceVideo.addEventListener("play", waitForFirstFrames);
+entranceVideo.addEventListener("playing", () => setTimeout(showVideo, 400));   // backstop for browsers without requestVideoFrameCallback
+entranceVideo.addEventListener("timeupdate", () => { if(entranceVideo.currentTime > 0.05 && !entranceVideo.paused) showVideo(); });
 
 function startEntrance(){
   if(!entranceVideo.paused) return;

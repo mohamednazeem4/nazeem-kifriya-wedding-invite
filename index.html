@@ -7,13 +7,15 @@
 <meta name="description" content="Together with our families, we invite you to celebrate the wedding of Mohamed Nazeem &amp; Kifriya Muqsin.">
 
 <!-- Link preview (WhatsApp, Telegram, iMessage, Facebook, X).
-     IMPORTANT: replace YOUR-DOMAIN.com below with the real address where this invitation is hosted.
-     The image must be a full https:// address (not a relative path) or the preview will stay plain. -->
+     The image must be a full https:// address (not a relative path) or the preview will stay plain.
+     WhatsApp caches previews heavily: if og-image.jpg ever changes, bump the ?v= number on the two image URLs below.
+     When testing, also add ?v=2 (then ?v=3 ...) to the invitation link you paste into WhatsApp. -->
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/">
 <meta property="og:site_name" content="Nazeem &amp; Kifriya — Wedding Invitation">
 <meta property="og:title" content="Mohamed Nazeem &amp; Kifriya Muqsin — Wedding Invitation">
 <meta property="og:description" content="Together with our families, we invite you to celebrate our wedding.">
-<meta property="og:image" content="https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/assets/og-image.jpg">
+<meta property="og:image" content="https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/assets/og-image.jpg?v=2">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
@@ -21,8 +23,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Mohamed Nazeem &amp; Kifriya Muqsin — Wedding Invitation">
 <meta name="twitter:description" content="Together with our families, we invite you to celebrate our wedding.">
-<meta name="twitter:image" content="https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/assets/og-image.jpg">
+<meta name="twitter:image" content="https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/assets/og-image.jpg?v=2">
 <title>Mohamed Nazeem &amp; Kifriya Muqsin</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b0e13'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Georgia,serif' font-size='28' fill='%23d5ad67'%3EN%C2%B7K%3C/text%3E%3C/svg%3E">
 
 <!-- Fonts: only the weights actually used (Cormorant 300/400/600 + italic 400, Montserrat 300/500, Scheherazade 400, Great Vibes) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -301,6 +304,9 @@ section p.label--lg{font-size:20px}
   text-overflow:ellipsis;
 }
 .timer{display:grid;grid-template-columns:repeat(4,1fr);max-width:760px;width:100%;margin:auto;gap:16px}
+/* After the wedding time the boxes give way to a message (see tick() in the script) */
+.countdown.is-done .timer{display:none}
+.countdown.is-done h2{margin-bottom:0}
 .tbox{
   padding:22px 10px;
   background: rgba(255, 255, 255, 0.04);
@@ -535,7 +541,7 @@ section { overflow-x: clip; }
   <canvas id="heroBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
 
   <div class="content parallax-fg" data-speed="-0.15">
-    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    <div class="bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
     <div class="monogram">N · K</div>
     <h1><span class="name-line">Mohamed Nazeem</span><span class="amp">&amp;</span><span class="name-line">Kifriya Muqsin</span></h1>
   </div>
@@ -583,8 +589,8 @@ section { overflow-x: clip; }
 <section class="countdown">
   <canvas id="countdownBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="reveal">
-    <div class="kicker kicker--gold kicker--m">THE BIG DAY IS COMING</div>
-    <h2>COUNTING DOWN TO FOREVER</h2>
+    <div class="kicker kicker--gold kicker--m" id="cdKicker">THE BIG DAY IS COMING</div>
+    <h2 id="cdTitle">COUNTING DOWN TO FOREVER</h2>
     <div class="timer">
       <div class="tbox"><span class="tnum" id="d">--</span><span class="tlabel">DAYS</span></div>
       <div class="tbox"><span class="tnum" id="h">--</span><span class="tlabel">HOURS</span></div>
@@ -640,7 +646,7 @@ section { overflow-x: clip; }
   <canvas id="venueBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="venue-inner glass-card reveal">
     <h2>THE VENUE</h2>
-    <div class="venue-name">C.S.I Lite Auditorium</div>
+    <div class="venue-name">CSI Lite Auditorium</div>
     <div class="venue-address">17 Balfour Road, behind CSI BAIN Matric Higher Secondary School,<br>Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India</div>
     <div class="location-wrap">
       <div class="qr">
@@ -667,7 +673,7 @@ section { overflow-x: clip; }
   <div class="dua-inner glass-card reveal">
     <div class="flower flower--still" aria-hidden="true"><svg class="ico"><use href="#ic-moon"/></svg></div>
     <div class="kicker kicker--gold kicker--m">A PRAYER FOR US</div>
-    <h2>Dua for the Newly Wed</h2>
+    <h2>Dua for the Newlyweds</h2>
     <p class="dua-arabic" dir="rtl" lang="ar"><span class="dua-fit">بَارَكَ اللّٰهُ لَكَ وَبَارَكَ عَلَيْكَ وَجَمَعَ بَيْنَكُمَا فِي&thinsp;خَيْرٍ</span></p>
     <p class="dua-translit">Baarakallaahu laka wa baaraka 'alayka wa jama'a baynakumaa fee khayr.</p>
     <p class="dua-translation">"May Allah bless you, shower His blessings upon you, and unite you both in goodness."</p>
@@ -1001,8 +1007,35 @@ entranceVideo.addEventListener("play", waitForFirstFrames);
 entranceVideo.addEventListener("playing", () => setTimeout(showVideo, 400));   // backstop for browsers without requestVideoFrameCallback
 entranceVideo.addEventListener("timeupdate", () => { if(entranceVideo.currentTime > 0.05 && !entranceVideo.paused) showVideo(); });
 
+// Safety net for patchy mobile data. Once the guest has tapped, the invitation opens by itself if the video
+// errors out, or if playback makes no progress for STALL_LIMIT (never starts, or freezes part-way).
+// Progress is judged from currentTime, because the browser's "stalled"/"waiting" events are unreliable.
+// This is NOT a cap on how long the video may play: a video that keeps moving is never interrupted.
+const STALL_LIMIT = 5000;   // ms without progress before we give up on the video (5000-9000 is a sensible range)
+let tapped = false, stallTimer = null, lastTime = 0, lastProgressAt = 0;
+// Give up on the video: stop it first so a slow file can't start playing (with sound) behind the invitation.
+function giveUpOnVideo(){
+  try{ entranceVideo.pause(); }catch(_){}
+  openInvitation();
+}
+function watchForStall(){
+  clearInterval(stallTimer);
+  lastTime = entranceVideo.currentTime;
+  lastProgressAt = Date.now();
+  stallTimer = setInterval(() => {
+    if(entrance.classList.contains("entering")){ clearInterval(stallTimer); return; }
+    const t = entranceVideo.currentTime;
+    // Moving, or deliberately paused (tab in the background, phone call): not a stall, so keep the clock fresh.
+    if(t !== lastTime || entranceVideo.paused || document.hidden){ lastTime = t; lastProgressAt = Date.now(); return; }
+    if(Date.now() - lastProgressAt >= STALL_LIMIT){ clearInterval(stallTimer); giveUpOnVideo(); }
+  }, 500);
+}
+entranceVideo.addEventListener("error", () => { if(tapped) giveUpOnVideo(); });
+
 function startEntrance(){
   if(!entranceVideo.paused) return;
+  tapped = true;
+  watchForStall();
   entranceVideo.play().catch(openInvitation);
 }
 
@@ -1014,10 +1047,27 @@ envelope.addEventListener("keydown", e => {
 });
 
 // ---------- COUNTDOWN ----------
-const target = Date.UTC(2026, 11, 26, 6, 0, 0);
+const target = Date.UTC(2026, 11, 26, 6, 0, 0);     // 26 Dec 2026, 11:30 AM IST (the Nikkah)
+const dayEnd = Date.UTC(2026, 11, 26, 18, 30, 0);   // midnight IST at the end of 26 Dec
+const cdSection = document.querySelector(".countdown");
+const cdKicker  = document.getElementById("cdKicker");
+const cdTitle   = document.getElementById("cdTitle");
+let cdState = "before", cdTimer = null;
+function showCountdownMessage(state){
+  if(cdState === state) return;
+  cdState = state;
+  cdSection.classList.add("is-done");
+  if(state === "today"){ cdKicker.textContent = "THE WAIT IS OVER";  cdTitle.textContent = "TODAY'S THE DAY"; }
+  else                  { cdKicker.textContent = "WITH GRATITUDE";    cdTitle.textContent = "THANK YOU FOR THE LOVE"; }
+}
 function tick(){
   const now = Date.now();
-  const diff = Math.max(0, target - now);
+  if(now >= target){
+    showCountdownMessage(now < dayEnd ? "today" : "after");
+    if(cdState === "after" && cdTimer) clearInterval(cdTimer);
+    return;
+  }
+  const diff = target - now;
   const dd = Math.floor(diff / 86400000);
   const hh = Math.floor((diff % 86400000) / 3600000);
   const mm = Math.floor((diff % 3600000) / 60000);
@@ -1028,7 +1078,7 @@ function tick(){
   document.getElementById("m").textContent = pad(mm);
   document.getElementById("s").textContent = pad(ss);
 }
-tick(); setInterval(tick, 1000);
+tick(); cdTimer = setInterval(tick, 1000);
 
 // ---------- SCROLL REVEALS ----------
 const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add("show"); }), {threshold:.12});

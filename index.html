@@ -54,6 +54,7 @@
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--dark);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:300;position:relative;overflow-x:hidden}
 section{position:relative}
+section[id]{scroll-margin-top:84px} /* anchored sections stop below the fixed quick-nav */
 button,a{font:inherit}
 img{max-width:100%}
 
@@ -166,6 +167,10 @@ img{max-width:100%}
   box-shadow: 0 8px 25px rgba(213, 173, 103, 0.4);
   background: var(--gold-soft);
 }
+
+/* Ghost gold button for dark sections (venue: copy address) */
+.btn-ghost-gold{display:inline-block;margin-top:18px;margin-left:10px;padding:13px 24px;border:1px solid rgba(213,173,103,.55);color:var(--gold);background:transparent;border-radius:30px;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),background .35s ease,border-color .35s ease}
+.btn-ghost-gold:hover,.btn-ghost-gold:focus{background:rgba(213,173,103,.14);border-color:var(--gold);transform:translateY(-3px)}
 
 /* ================= GLASSMORPHISM CARD OVERLAYS ================= */
 .glass-card {
@@ -330,26 +335,71 @@ section p.label--lg{font-size:20px}
 .schedule{background:#fbf4ee;color:var(--text);padding:110px 22px 90px;text-align:center;position:relative}
 .schedule-inner{max-width:540px;margin:0 auto;padding:40px 28px}
 .schedule .date-line{font-family:"Cormorant Garamond", serif;font-size:20px;font-weight:600;color:var(--text-soft)}
-.timeline{position:relative;max-width:340px;margin:44px auto 0;text-align:left}
-.timeline:before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:0;border-left:1px dashed var(--gold);transform:translateX(-50%)}
+.timeline{position:relative;max-width:400px;margin:44px auto 0;text-align:left}
+.timeline:before{content:"";position:absolute;left:50%;top:50px;bottom:50px;width:0;border-left:1px dashed var(--gold);transform:translateX(-50%)}
 .t-row{
+  position:relative;
+  z-index:1;
   display:grid;
-  grid-template-columns:1fr 30px 1fr;
+  grid-template-columns:1fr 62px 1fr;
+  column-gap:14px;
   align-items:center;
-  min-height:72px;
-  padding: 8px 4px;
-  border-radius: 8px;
+  min-height:96px;
+  padding: 6px 4px;
+  border-radius: 12px;
   transition: transform 0.35s var(--ease-fluid), background 0.35s ease;
 }
 .t-row:hover {
   transform: scale(1.03);
   background: rgba(213, 173, 103, 0.08);
 }
-.t-time{font-family:"Bickham Script Pro", serif;font-size:20px;line-height:1.1;color:var(--text);text-align:right;padding-right:12px;font-weight:400}
-.t-label{font-size:18px;font-weight:500;letter-spacing:.03em;color:var(--text-soft);text-align:left;padding-left:12px;line-height:1.4}
-.t-mark{position:relative;display:flex;align-items:center;justify-content:center}
-.t-mark .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);transition: transform 0.3s var(--ease-fluid);}
-.t-row:hover .t-mark .dot { transform: scale(1.5); }
+.t-time{font-family:"Bickham Script Pro", serif;font-size:20px;line-height:1.1;color:var(--text);text-align:right;font-weight:400;white-space:nowrap}
+.t-mark{
+  position:relative;
+  width:62px;height:62px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#fdf9f4;
+  border:1px solid rgba(213,173,103,.6);
+  box-shadow:0 6px 16px rgba(140,106,70,.12), inset 0 0 0 4px rgba(255,255,255,.5);
+}
+.t-mark svg{width:40px;height:40px;display:block;transition: transform 0.35s var(--ease-fluid);}
+.t-row:hover .t-mark svg { transform: scale(1.12); }
+
+/* ---- icon entrance pop (staggered once the schedule card is revealed) ---- */
+.t-mark{ transform: scale(.4); opacity: 0; transition: opacity .55s var(--ease-fluid), transform .6s var(--ease-fluid); }
+.schedule-inner.show .t-mark{ transform: scale(1); opacity: 1; }
+.schedule-inner.show .timeline .t-row:nth-child(1) .t-mark{ transition-delay: .15s; }
+.schedule-inner.show .timeline .t-row:nth-child(2) .t-mark{ transition-delay: .38s; }
+.schedule-inner.show .timeline .t-row:nth-child(3) .t-mark{ transition-delay: .61s; }
+
+/* ---- ambient icon animations ---- */
+@keyframes bloomPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.7);opacity:.35}}
+@keyframes leafSway{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(20deg)}}
+@keyframes gemTwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.05;transform:scale(.35)}}
+@keyframes steamRise{0%{opacity:0;transform:translateY(5px) scale(1)}40%{opacity:1}100%{opacity:0;transform:translateY(-15px) scale(1.4)}}
+
+.t-mark .bloom{transform-box:fill-box;transform-origin:50% 50%;animation:bloomPulse 1.5s ease-in-out infinite}
+.t-mark .leaf{transform-box:fill-box;transform-origin:50% 100%;animation:leafSway 1.8s ease-in-out infinite}
+.t-mark .gem{transform-box:fill-box;transform-origin:50% 50%;animation:gemTwinkle 2.4s ease-in-out infinite}
+.t-mark .steam{transform-box:fill-box;transform-origin:50% 100%;animation:steamRise 1.3s ease-in-out infinite}
+
+@media (prefers-reduced-motion: reduce){
+  .t-mark{transition:none}
+  .t-mark .bloom,.t-mark .leaf,.t-mark .gem,.t-mark .steam{animation:none}
+}
+.t-copy{text-align:left}
+.t-title{font-family:"Cormorant Garamond", serif;font-weight:700;font-size:22px;color:var(--text-soft);line-height:1.2}
+.t-sub{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;font-weight:600;line-height:1.35}
+@media(max-width:400px){
+  .timeline{column-gap:0}
+  .t-row{column-gap:9px}
+  .t-mark{width:52px;height:52px}
+  .t-mark svg{width:32px;height:32px}
+  .t-time{font-size:15px}
+  .t-title{font-size:19px}
+  .t-sub{font-size:9px;letter-spacing:1.1px}
+}
 
 /* ================= VENUE ================= */
 .venue{background:var(--wine);padding:110px 22px 90px;display:grid;place-items:center;text-align:center;position:relative}
@@ -411,6 +461,41 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px clamp(10p
  .dua { padding-left: 14px; padding-right: 14px; }
  .dua-inner { padding: 40px 14px; }
 }
+
+/* ================= V8 CREATIVE ADDITIONS ================= */
+
+/* --- Hero name shimmer (graceful fallback: plain text where unsupported) --- */
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  h1 .name-line{background:linear-gradient(100deg,#fff0e7 25%,#e9cfa0 42%,#d5ad67 50%,#e9cfa0 58%,#fff0e7 75%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:nameShimmer 7s ease-in-out infinite}
+  @keyframes nameShimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+}
+
+/* --- Countdown tick pulse (seconds only, subtle) --- */
+.tnum.tick{animation:tickPulse .45s ease}
+@keyframes tickPulse{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* --- Outline gold buttons (Add to Calendar / Share) --- */
+.btn-gold-outline{display:inline-block;margin-top:30px;padding:14px 28px;border:1px solid var(--gold);color:var(--gold-deep);background:transparent;border-radius:30px;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),box-shadow .35s ease,background .35s ease,color .35s ease}
+.btn-gold-outline:hover,.btn-gold-outline:focus{background:var(--gold);color:#241419;transform:translateY(-3px);box-shadow:0 8px 25px rgba(213,173,103,.35)}
+.closing .btn-gold-outline{border-color:var(--gold-deep)}
+.closing .btn-gold-outline:hover{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff}
+
+/* side-by-side calendar actions */
+.cal-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.cal-row .btn-gold-outline{margin-top:0}
+
+/* --- Dua moon halo --- */
+.dua .flower{position:relative}
+.dua .flower:before{content:"";position:absolute;inset:-30px;border-radius:50%;background:radial-gradient(circle,rgba(213,173,103,.4),transparent 70%);animation:duaGlow 4s ease-in-out infinite;z-index:-1;pointer-events:none}
+@keyframes duaGlow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.18)}}
+
+/* --- Side progress dots (desktop, fine pointers only) --- */
+.progress-dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:8990;display:flex;flex-direction:column;gap:13px}
+.progress-dots a{width:9px;height:9px;border-radius:50%;border:1px solid rgba(213,173,103,.7);transition:transform .3s ease,background .3s ease,box-shadow .3s ease}
+.progress-dots a:hover{transform:scale(1.3)}
+.progress-dots a.active{background:var(--gold);box-shadow:0 0 10px rgba(213,173,103,.9);transform:scale(1.3)}
+@media(max-width:900px),(pointer:coarse){.progress-dots{display:none}}
+@media(prefers-reduced-motion:reduce){.dua .flower:before{animation:none}}
 
 /* ================= AMBIENT POLISH ================= */
 body::before {
@@ -495,6 +580,9 @@ section { overflow-x: clip; }
     <li><a href="#dua">Dua</a></li>
   </ul>
 </nav>
+
+<!-- Side progress dots (desktop only; built from the quick-nav links by the script below) -->
+<div class="progress-dots" id="progressDots" aria-hidden="true"></div>
 
 <div class="entrance" id="entrance">
   <div class="entrance-stage" id="envelope" role="button" tabindex="0" aria-label="Touch to open wedding invitation">
@@ -613,29 +701,75 @@ section { overflow-x: clip; }
     <div class="timeline">
       <div class="t-row">
         <div class="t-time">11:00 AM</div>
-        <div class="t-mark"><span class="dot"></span></div>
-        <div class="t-label">Arrival</div>
+        <div class="t-mark">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M8 26V14a8 8 0 0 1 16 0v12" stroke="var(--gold-deep)" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="5" y1="26" x2="27" y2="26" stroke="var(--gold-deep)" stroke-width="1.6" stroke-linecap="round"/>
+            <g fill="var(--gold)">
+              <ellipse class="leaf" style="animation-delay:0s" cx="10.7" cy="7.9" rx="1.3" ry="0.6" transform="rotate(-40 10.7 7.9)"/>
+              <ellipse class="leaf" style="animation-delay:.7s" cx="14" cy="5" rx="1.3" ry="0.55" transform="rotate(-15 14 5)"/>
+              <ellipse class="leaf" style="animation-delay:1.4s" cx="18" cy="5" rx="1.3" ry="0.55" transform="rotate(15 18 5)"/>
+              <ellipse class="leaf" style="animation-delay:2.1s" cx="21.3" cy="7.9" rx="1.3" ry="0.6" transform="rotate(40 21.3 7.9)"/>
+            </g>
+            <g class="bloom" style="animation-delay:0s" fill="var(--gold-deep)">
+              <circle cx="8.3" cy="9.3" r="0.62"/><circle cx="9.5" cy="9.3" r="0.62"/><circle cx="8.9" cy="8.7" r="0.62"/><circle cx="8.9" cy="9.9" r="0.62"/><circle cx="8.9" cy="9.3" r="0.55"/>
+            </g>
+            <g class="bloom" style="animation-delay:.5s" fill="var(--gold-deep)">
+              <circle cx="11.15" cy="6.35" r="0.78"/><circle cx="12.65" cy="6.35" r="0.78"/><circle cx="11.9" cy="5.6" r="0.78"/><circle cx="11.9" cy="7.1" r="0.78"/><circle cx="11.9" cy="6.35" r="0.68"/>
+            </g>
+            <g class="bloom" style="animation-delay:1s" fill="var(--gold-deep)">
+              <circle cx="15" cy="4.6" r="0.95"/><circle cx="17" cy="4.6" r="0.95"/><circle cx="16" cy="3.6" r="0.95"/><circle cx="16" cy="5.6" r="0.95"/><circle cx="16" cy="4.6" r="0.85"/>
+            </g>
+            <g class="bloom" style="animation-delay:1.5s" fill="var(--gold-deep)">
+              <circle cx="19.35" cy="6.35" r="0.78"/><circle cx="20.85" cy="6.35" r="0.78"/><circle cx="20.1" cy="5.6" r="0.78"/><circle cx="20.1" cy="7.1" r="0.78"/><circle cx="20.1" cy="6.35" r="0.68"/>
+            </g>
+            <g class="bloom" style="animation-delay:2s" fill="var(--gold-deep)">
+              <circle cx="22.5" cy="9.3" r="0.62"/><circle cx="23.7" cy="9.3" r="0.62"/><circle cx="23.1" cy="8.7" r="0.62"/><circle cx="23.1" cy="9.9" r="0.62"/><circle cx="23.1" cy="9.3" r="0.55"/>
+            </g>
+          </svg>
+        </div>
+        <div class="t-copy">
+          <div class="t-title">Welcome</div>
+          <div class="t-sub">Gather &amp; Greet</div>
+        </div>
       </div>
       <div class="t-row">
         <div class="t-time">11:30 AM</div>
-        <div class="t-mark bloom">
-          <svg width="24" height="24" viewBox="0 0 26 26" fill="none">
-            <g fill="var(--gold)">
-              <ellipse cx="13" cy="7" rx="3.4" ry="5"/>
-              <ellipse cx="13" cy="19" rx="3.4" ry="5"/>
-              <ellipse cx="7" cy="13" rx="5" ry="3.4"/>
-              <ellipse cx="19" cy="13" rx="5" ry="3.4"/>
-            </g>
-            <circle cx="13" cy="13" r="3" fill="#fbf4ee" stroke="#8c6a46" stroke-width="0.8"/>
+        <div class="t-mark">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="10.88" cy="17.28" r="6.4" stroke="var(--gold-deep)" stroke-width="1.6"/>
+            <circle cx="21.12" cy="17.28" r="6.4" stroke="var(--gold-deep)" stroke-width="1.6"/>
+            <path class="gem" style="animation-delay:0s" d="M8.7 8.32L13.06 8.32L14.02 9.98L10.88 13.57L7.74 9.98Z" stroke="var(--gold-deep)" stroke-width="1.2" stroke-linejoin="round"/>
+            <path class="gem" style="animation-delay:1.3s" d="M18.94 8.32L23.3 8.32L24.26 9.98L21.12 13.57L17.98 9.98Z" stroke="var(--gold-deep)" stroke-width="1.2" stroke-linejoin="round"/>
           </svg>
         </div>
-        <div class="t-label">Nikkah</div>
+        <div class="t-copy">
+          <div class="t-title">Nikkah</div>
+          <div class="t-sub">The Sacred Union</div>
+        </div>
       </div>
       <div class="t-row">
         <div class="t-time">12:00 PM</div>
-        <div class="t-mark"><span class="dot"></span></div>
-        <div class="t-label">Lunch</div>
+        <div class="t-mark">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M6 20a10 10 0 0 1 20 0" stroke="var(--gold-deep)" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="4" y1="20" x2="28" y2="20" stroke="var(--gold-deep)" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="6" y1="24" x2="26" y2="24" stroke="var(--gold-deep)" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="16" cy="8.3" r="1.6" fill="var(--gold-deep)"/>
+            <line x1="16" y1="9.9" x2="16" y2="11.5" stroke="var(--gold-deep)" stroke-width="1.6"/>
+            <path class="steam" style="animation-delay:0s" d="M13 6.2c0.8 -1 -0.8 -1.8 0 -2.8c0.8 -1 -0.8 -1.6 0 -2.4" stroke="var(--gold-deep)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+            <path class="steam" style="animation-delay:1.4s" d="M19 6.2c-0.8 -1 0.8 -1.8 0 -2.8c-0.8 -1 0.8 -1.6 0 -2.4" stroke="var(--gold-deep)" stroke-width="1.3" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="t-copy">
+          <div class="t-title">Lunch</div>
+          <div class="t-sub">Let Us Feast Together</div>
+        </div>
       </div>
+    </div>
+    <div class="cal-row">
+      <a class="btn-gold-outline" id="addToCal" href="#">ADD TO CALENDAR</a>
+      <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T073000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Lunch%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
     </div>
   </div>
   <div class="scrollhint scrollhint--light">THE SCENE IS SET…
@@ -661,6 +795,7 @@ section { overflow-x: clip; }
         <div class="kicker kicker--gold kicker--s">EXACT LOCATION</div>
         <p class="location-note">Scan the QR code or tap below to open the exact venue location in Google Maps.</p>
         <a class="map-button" href="https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NxgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA8MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" target="_blank" rel="noopener">OPEN IN GOOGLE MAPS ↗</a>
+        <button class="btn-ghost-gold" id="copyAddress" type="button">COPY ADDRESS</button>
       </div>
     </div>
   </div>
@@ -692,6 +827,7 @@ section { overflow-x: clip; }
     <h2>Mohamed Nazeem<br><span class="amp">&amp;</span><br>Kifriya Muqsin</h2>
     <p>We look forward to sharing our special day with you.</p>
     <div class="initials">N · K</div>
+    <button class="btn-gold-outline" id="shareInvite" type="button">SHARE THIS INVITATION</button>
   </div>
   <div class="scrollhint scrollhint--light">THANK YOU FOR BEING PART OF OUR STORY<svg class="ico" aria-hidden="true"><use href="#ic-heart"/></svg>
   </div>
@@ -1077,7 +1213,9 @@ function tick(){
   document.getElementById("d").textContent = dd;
   document.getElementById("h").textContent = pad(hh);
   document.getElementById("m").textContent = pad(mm);
-  document.getElementById("s").textContent = pad(ss);
+  var sEl = document.getElementById("s");
+  sEl.textContent = pad(ss);
+  sEl.classList.remove("tick"); void sEl.offsetWidth; sEl.classList.add("tick");  // subtle pulse each second
 }
 tick(); cdTimer = setInterval(tick, 1000);
 
@@ -1089,6 +1227,20 @@ document.querySelectorAll(".reveal").forEach(e => io.observe(e));
 // Positions are measured once (and again on resize / font load); the scroll handler only
 // does cheap maths and runs at most once per animation frame, so scrolling never forces layout.
 const navLinks = document.querySelectorAll('.quick-nav-links a');
+
+// ---------- SIDE PROGRESS DOTS (mirrors the quick-nav links; desktop only via CSS) ----------
+const dotsWrap = document.getElementById('progressDots');
+const dots = [];
+if (dotsWrap) {
+  navLinks.forEach(link => {
+    const d = document.createElement('a');
+    d.href = link.getAttribute('href');
+    d.setAttribute('aria-hidden', 'true');
+    d.tabIndex = -1;
+    dotsWrap.appendChild(d);
+    dots.push(d);
+  });
+}
 let parallaxItems = [];   // { el, speed, top, bottom }
 let navSections = [];     // { id, top, bottom }
 let viewH = window.innerHeight;
@@ -1127,7 +1279,11 @@ function applyScroll(){
   for (const sec of navSections){
     if (scrollTop >= sec.top && scrollTop < sec.bottom) currentSec = sec.id;
   }
-  navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + currentSec));
+  navLinks.forEach((link, i) => {
+    const on = link.getAttribute('href') === '#' + currentSec;
+    link.classList.toggle('active', on);
+    if (dots[i]) dots[i].classList.toggle('active', on);
+  });
 }
 
 function requestScrollFrame(){
@@ -1534,6 +1690,81 @@ remeasure();
   }, { threshold: 0.08 });
 
   targets.forEach(function (el) { observer.observe(el); });
+})();
+</script>
+
+<script>
+/* V8 — Add to Calendar (.ics download) + Share invitation */
+(function () {
+  // Build a real calendar file on the fly: 26 Dec 2026, 11:00 AM–1:00 PM IST (05:30–07:30 UTC).
+  var calBtn = document.getElementById('addToCal');
+  if (calBtn) calBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    function f(n){ return String(n).padStart(2, '0'); }
+    var now = new Date();
+    var stamp = now.getUTCFullYear() + f(now.getUTCMonth() + 1) + f(now.getUTCDate()) +
+                'T' + f(now.getUTCHours()) + f(now.getUTCMinutes()) + f(now.getUTCSeconds()) + 'Z';
+    var lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//NazeemKifriya//Wedding Invite//EN',
+      'BEGIN:VEVENT',
+      'UID:nazeem-kifriya-wedding-20261226@invite',
+      'DTSTAMP:' + stamp,
+      'DTSTART:20261226T053000Z',
+      'DTEND:20261226T073000Z',
+      'SUMMARY:Nazeem & Kifriya \\u2014 Wedding (Nikkah)',
+      'LOCATION:CSI Lite Auditorium\\, 17 Balfour Road\\, Kellys\\, Kilpauk\\, Chennai\\, Tamil Nadu 600010\\, India',
+      'DESCRIPTION:Welcome 11:00 AM \\u00b7 Nikkah 11:30 AM \\u00b7 Lunch 12:00 PM (IST)',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ];
+    var blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'nazeem-kifriya-wedding.ics';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  });
+
+  // Native share sheet on mobile, clipboard fallback on desktop.
+  var shareBtn = document.getElementById('shareInvite');
+  if (shareBtn) shareBtn.addEventListener('click', function () {
+    var data = {
+      title: 'Nazeem & Kifriya \u2014 Wedding Invitation',
+      text: 'Together with our families, we invite you to celebrate the wedding of Mohamed Nazeem & Kifriya Muqsin \u2014 26 December 2026.',
+      url: 'https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/'
+    };
+    if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      var btn = this;
+      navigator.clipboard.writeText(data.url).then(function () {
+        var old = btn.textContent;
+        btn.textContent = 'LINK COPIED';
+        setTimeout(function () { btn.textContent = old; }, 2200);
+      }).catch(function () { window.prompt('Copy this invitation link:', data.url); });
+      return;
+    }
+    window.prompt('Copy this invitation link:', data.url);
+  });
+})();
+</script>
+
+<script>
+/* Copy venue address to clipboard (for Uber/Ola) */
+(function () {
+  var btn = document.getElementById('copyAddress');
+  if (!btn) return;
+  var addr = 'CSI Lite Auditorium, 17 Balfour Road, behind CSI BAIN Matric Higher Secondary School, Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India';
+  btn.addEventListener('click', function () {
+    function done(){ var old = btn.textContent; btn.textContent = 'COPIED \u2713'; setTimeout(function(){ btn.textContent = old; }, 2200); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(addr).then(done).catch(function(){ window.prompt('Copy the venue address:', addr); });
+    } else {
+      window.prompt('Copy the venue address:', addr);
+    }
+  });
 })();
 </script>
 

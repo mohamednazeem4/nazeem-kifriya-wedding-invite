@@ -251,7 +251,9 @@ h1{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(30px,
 body.opened .bismillah{animation:heroIn 1.1s .22s ease-out forwards}
 body.opened .monogram{animation:heroIn 1.1s .3s ease-out forwards}
 body.opened h1{animation:heroIn 1.2s .38s ease-out forwards}
-h1 .name-line{display:block;white-space:nowrap}
+/* The shimmer below paints the gradient ONLY inside this box, and the h1's tight line-height (.86) makes the box shorter than the letters,
+   so the tails of y / q (and tall tops) in "Kifriya Muqsin" were cut off. The padding gives the letters room; the equal negative margin cancels it, so nothing moves. */
+h1 .name-line{display:block;white-space:nowrap;padding:.16em 0 .3em;margin:-.16em 0 -.3em}
 h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1em 0}
 .scrollhint{position:absolute;bottom:22px;left:0;right:0;padding:0 22px;text-align:center;font-size:13px;font-weight:500;letter-spacing:3px;line-height:1.6;text-transform:uppercase;text-wrap:balance;opacity:.65;z-index:2}
 .scroll-arrow{display:block;width:18px;height:40px;margin:14px auto 0;animation:arrowPulse 1.7s ease-in-out infinite}

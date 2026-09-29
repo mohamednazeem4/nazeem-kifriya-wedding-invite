@@ -49,6 +49,7 @@
   --text-soft:#7a5f66;
   --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);
   --gold-deep:#8c6a46; /* gold that stays readable on the cream sections */
+  --gold-text:#785b3c; /* darker gold for small text on cream-deep (4.8:1; --gold-deep was 3.8:1 there) */
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -95,10 +96,14 @@ img{max-width:100%}
   text-decoration: none;
   white-space: nowrap;
   flex: none;
+  /* tap target: grows the clickable height to the full bar without moving anything */
+  padding: 12px 0;
+  margin: -12px 0;
 }
 .quick-nav-links {
+  --g: 16px;                       /* space between links (halved into each link's hit area below) */
   display: flex;
-  gap: calc(16px * var(--u));
+  gap: calc(var(--g) * var(--u));
   flex: none;
   white-space: nowrap;
   list-style: none;
@@ -114,6 +119,10 @@ img{max-width:100%}
   opacity: 0.7;
   transition: opacity 0.3s ease, color 0.3s ease, transform 0.3s var(--ease-fluid);
   display: inline-block;
+  /* tap target: ~44px tall and touching its neighbours; the negative margin cancels the padding so the
+     layout (and the fit-to-width script that measures it) is exactly as before */
+  padding: 14px calc(var(--g) * var(--u) / 2);
+  margin: -14px calc(var(--g) * var(--u) / -2);
 }
 .quick-nav-links a:hover,
 .quick-nav-links a.active {
@@ -285,7 +294,7 @@ section p.label--lg{font-size:20px}
 .scratch-under{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:10px 24px}
 .scratch-under .rdate{font-family:"Cormorant Garamond", serif;font-size:28px;color:var(--rose);line-height:1.2}
 .scratch-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;transition:opacity .8s ease}
-.scratch-hint{font-size:14px;letter-spacing:3px;color:var(--gold-deep);margin-top:16px;transition:opacity 0.5s ease}
+.scratch-hint{font-size:14px;letter-spacing:3px;color:var(--gold-text);margin-top:16px;transition:opacity 0.5s ease}
 .scratch-hint .ico{display:inline-block;width:.8em;height:.8em;vertical-align:-.04em;margin:0 .6em}
 .reveal-section .lead{font-family:"Cormorant Garamond", serif;font-size:22px;color:var(--text-soft)}
 
@@ -392,7 +401,7 @@ section p.label--lg{font-size:20px}
 }
 .t-copy{text-align:left}
 .t-title{font-family:"Cormorant Garamond", serif;font-weight:700;font-size:22px;color:var(--text-soft);line-height:1.2}
-.t-sub{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;font-weight:600;line-height:1.35}
+.t-sub{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;font-weight:500;line-height:1.35}
 @media(max-width:400px){
   .timeline{column-gap:0}
   .t-row{column-gap:9px}
@@ -445,7 +454,8 @@ section p.label--lg{font-size:20px}
 
 /* ================= CLOSING ================= */
 .closing{background:var(--cream);color:var(--text);display:grid;place-items:center;text-align:center;padding:110px 22px 90px;position:relative}
-.closing h2{font-size:52px}
+.closing h2{font-size:min(52px,10vw)} /* fallback only - the fit script sets the exact size */
+.close-line{white-space:nowrap}
 .initials{font-family:"Cormorant Garamond", serif;font-size:40px;letter-spacing:9px;color:var(--gold-deep);margin-top:35px}
 .closing .amp{font-size:.7em;color:var(--gold-deep)}
 footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px clamp(10px,3vw,25px);font-size:12px;letter-spacing:.25em;position:relative;z-index:2}
@@ -456,7 +466,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px clamp(10p
  .location-wrap{grid-template-columns:1fr;text-align:center;justify-items:center}
  .venue-address br{display:none}
  .quick-nav { padding: 12px 12px; }
- .quick-nav-links { gap: calc(8px * var(--u)); }
+ .quick-nav-links { --g: 8px; }
  .quick-nav-links a { font-size: calc(11px * var(--u)); letter-spacing: calc(.3px * var(--u)); }
  .quick-nav-brand { font-size: calc(14px * var(--u)); letter-spacing: calc(1px * var(--u)); }
  /* more room for the one-line Arabic dua */
@@ -771,7 +781,7 @@ section { overflow-x: clip; }
     </div>
     <div class="cal-row">
       <a class="btn-gold-outline" id="addToCal" href="#">ADD TO CALENDAR</a>
-      <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T073000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Lunch%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
+      <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T073000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Valima%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
     </div>
   </div>
   <div class="scrollhint scrollhint--light">THE SCENE IS SET…
@@ -826,7 +836,7 @@ section { overflow-x: clip; }
   <div class="reveal">
     <div class="flower flower--still" aria-hidden="true"><svg class="ico"><use href="#ic-heart"/></svg></div>
     <div class="kicker kicker--l">WITH LOVE</div>
-    <h2>Mohamed Nazeem<br><span class="amp">&amp;</span><br>Kifriya Muqsin</h2>
+    <h2><span class="close-line">Mohamed Nazeem</span><br><span class="amp">&amp;</span><br><span class="close-line">Kifriya Muqsin</span></h2>
     <p>We look forward to sharing our special day with you.</p>
     <div class="initials">N · K</div>
     <button class="btn-gold-outline" id="shareInvite" type="button">SHARE THIS INVITATION</button>
@@ -838,7 +848,7 @@ section { overflow-x: clip; }
 
 <script>
 // ---------- GLOBAL OVERLAY: BOKEH & LEAF DRIFT EFFECT ----------
-(function initGlobalAmbient() {
+try { (function initGlobalAmbient() {
   const canvas = document.getElementById('globalAmbientCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -947,7 +957,31 @@ section { overflow-x: clip; }
     requestAnimationFrame(animateGlobal);
   }
   animateGlobal();
-})();
+})(); } catch (err) { console.warn('Ambient effect skipped:', err); }
+
+// ---------- RUN A CANVAS LOOP ONLY WHILE ITS SECTION IS ON SCREEN ----------
+// Ten canvases animating at once is heavy on mid-range phones; only the ones near the viewport get frames.
+// The observer watches the section (not the canvas, which is moved by the parallax script).
+function runWhileVisible(target, step){
+  let running = false, visible = true;
+  function frame(){
+    if(!visible){ running = false; return; }
+    step();
+    requestAnimationFrame(frame);
+  }
+  function start(){
+    if(running || !visible) return;
+    running = true;
+    requestAnimationFrame(frame);
+  }
+  if('IntersectionObserver' in window && target){
+    new IntersectionObserver(function(entries){
+      visible = entries[entries.length - 1].isIntersecting;
+      if(visible) start();
+    }, { rootMargin: '150px 0px' }).observe(target);
+  }
+  start();
+}
 
 // ---------- MULTI-SECTION BOKEH EFFECT ENGINE (DARK PAGES) ----------
 function initBokehEffect(canvasId, palette = ['213, 173, 103', '233, 207, 160', '255, 240, 231']) {
@@ -1013,15 +1047,13 @@ function initBokehEffect(canvasId, palette = ['213, 173, 103', '233, 207, 160', 
     particles.push(new Particle());
   }
 
-  function animate(){
+  runWhileVisible(canvas.parentElement, function(){
     ctx.clearRect(0, 0, width, height);
     particles.forEach(p => {
       p.update();
       p.draw();
     });
-    requestAnimationFrame(animate);
-  }
-  animate();
+  });
 }
 
 // ---------- GOLD PETAL DRIFT ENGINE (LIGHT PAGES) ----------
@@ -1079,28 +1111,32 @@ function initPetalEffect(canvasId) {
     petals.push(new Petal());
   }
 
-  function animate(){
+  runWhileVisible(canvas.parentElement, function(){
     ctx.clearRect(0, 0, width, height);
     petals.forEach(p => {
       p.update();
       p.draw();
     });
-    requestAnimationFrame(animate);
-  }
-  animate();
+  });
+}
+
+// Visual effects are decoration: if one fails, the rest of the page (and the tap-to-open entrance below) must still work.
+function safeInit(fn){
+  try{ fn.apply(null, Array.prototype.slice.call(arguments, 1)); }
+  catch(err){ console.warn('Effect skipped:', err); }
 }
 
 // Initialize dark page bokeh
-initBokehEffect('heroBokehCanvas', ['213, 173, 103', '233, 207, 160', '255, 240, 231']);
-initBokehEffect('countdownBokehCanvas', ['213, 173, 103', '233, 207, 160', '141, 64, 81']);
-initBokehEffect('venueBokehCanvas', ['213, 173, 103', '233, 207, 160', '141, 64, 81']);
-initBokehEffect('duaBokehCanvas', ['213, 173, 103', '233, 207, 160', '255, 240, 231']);
+safeInit(initBokehEffect, 'heroBokehCanvas', ['213, 173, 103', '233, 207, 160', '255, 240, 231']);
+safeInit(initBokehEffect, 'countdownBokehCanvas', ['213, 173, 103', '233, 207, 160', '141, 64, 81']);
+safeInit(initBokehEffect, 'venueBokehCanvas', ['213, 173, 103', '233, 207, 160', '141, 64, 81']);
+safeInit(initBokehEffect, 'duaBokehCanvas', ['213, 173, 103', '233, 207, 160', '255, 240, 231']);
 
 // Initialize light page floating petals
-initPetalEffect('introCanvas');
-initPetalEffect('revealCanvas');
-initPetalEffect('scheduleCanvas');
-initPetalEffect('closingCanvas');
+safeInit(initPetalEffect, 'introCanvas');
+safeInit(initPetalEffect, 'revealCanvas');
+safeInit(initPetalEffect, 'scheduleCanvas');
+safeInit(initPetalEffect, 'closingCanvas');
 
 // ---------- ENTRANCE ----------
 const envelope = document.getElementById("envelope");
@@ -1408,12 +1444,47 @@ remeasure();
   }
 })();
 
+// ---------- CLOSING NAMES: each name stays on ONE line at every screen size ----------
+// Measures the names at a large reference size, then sizes the heading so the widest name fits the section
+// (52px on roomy screens, smaller on phones). Room is measured on the section, not the heading, because the
+// heading's own width grows with its no-wrap text.
+(function fitClosingNames(){
+  const h2 = document.querySelector('.closing h2');
+  const section = h2 && h2.closest('section');
+  const lines = h2 ? h2.querySelectorAll('.close-line') : [];
+  if (!h2 || !section || !lines.length) return;
+
+  const MAX = 52, MIN = 16, REF = 100;
+  let queued = false;
+
+  function fit(){
+    queued = false;
+    h2.style.fontSize = REF + 'px';
+    let natural = 0;
+    lines.forEach(function(l){ natural = Math.max(natural, l.getBoundingClientRect().width); });
+    const cs = getComputedStyle(section);
+    const room = section.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (!natural || !room) return;
+    const size = Math.min(MAX, Math.max(MIN, (room / natural) * REF * 0.98));
+    h2.style.fontSize = size.toFixed(2) + 'px';
+  }
+  function schedule(){ if (!queued){ queued = true; requestAnimationFrame(fit); } }
+
+  fit();
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', schedule);
+  if (document.fonts){
+    if (document.fonts.ready) document.fonts.ready.then(schedule);
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
+  }
+})();
+
 // ---------- ENHANCED SCRATCH CARD ENGINE WITH RADIAL GRADIENTS & VELOCITY TRAILS ----------
 (function(){
   const canvas = document.getElementById('scratchCanvas');
   const stage = document.getElementById('scratchStage');
   const hint = document.getElementById('scratchHint');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });  // checkCleared() reads pixels while scratching
   
   const fxCanvas = document.getElementById('scratchEffectCanvas');
   const fxCtx = fxCanvas.getContext('2d');
@@ -1421,8 +1492,13 @@ remeasure();
   let sparkles = [];
   let lastPos = null;
 
-  function sizeCanvas(){
+  let lastW = -1;
+  function sizeCanvas(force){
     const rect = canvas.getBoundingClientRect();
+    // Mobile URL-bar show/hide fires "resize" with only the height changing; resizing a canvas wipes it,
+    // which would put the foil back on a half-scratched heart. Ignore height-only changes.
+    if(!force && Math.round(rect.width) === lastW) return;
+    lastW = Math.round(rect.width);
     canvas.width = rect.width;
     canvas.height = rect.height;
 
@@ -1452,8 +1528,8 @@ remeasure();
     }
   }
 
-  sizeCanvas();
-  window.addEventListener('resize', sizeCanvas);
+  sizeCanvas(true);
+  window.addEventListener('resize', function(){ sizeCanvas(false); });
 
   function getPos(e){
     const rect = canvas.getBoundingClientRect();
@@ -1515,6 +1591,7 @@ remeasure();
     const dy = p2.y - p1.y;
     const speed = Math.hypot(dx, dy);
     if (speed < 0.5) return;
+    ensureFX();
 
     const normX = dx / speed;
     const normY = dy / speed;
@@ -1547,6 +1624,7 @@ remeasure();
   }
 
   function triggerAutoRevealBurst(){
+    ensureFX();
     const centerX = fxCanvas.width / 2;
     const centerY = fxCanvas.height / 2;
 
@@ -1568,6 +1646,12 @@ remeasure();
     }
   }
 
+  let fxRunning = false;
+  function ensureFX(){                       // start the loop only when there is something to draw
+    if(fxRunning) return;
+    fxRunning = true;
+    requestAnimationFrame(animateFX);
+  }
   function animateFX(){
     fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
     for(let i = sparkles.length - 1; i >= 0; i--){
@@ -1616,9 +1700,9 @@ remeasure();
       }
       fxCtx.restore();
     }
-    requestAnimationFrame(animateFX);
+    if(sparkles.length) requestAnimationFrame(animateFX);
+    else fxRunning = false;                  // idle: no frames until the next scratch / burst
   }
-  animateFX();
 
   function checkCleared(){
     if(revealed) return;
@@ -1715,9 +1799,9 @@ remeasure();
       'DTSTAMP:' + stamp,
       'DTSTART:20261226T053000Z',
       'DTEND:20261226T073000Z',
-      'SUMMARY:Nazeem & Kifriya \\u2014 Wedding (Nikkah)',
+      'SUMMARY:Nazeem & Kifriya \u2014 Wedding (Nikkah)',
       'LOCATION:CSI Lite Auditorium\\, 17 Balfour Road\\, Kellys\\, Kilpauk\\, Chennai\\, Tamil Nadu 600010\\, India',
-      'DESCRIPTION:Welcome 11:00 AM \\u00b7 Nikkah 11:30 AM \\u00b7 Lunch 12:00 PM (IST)',
+      'DESCRIPTION:Welcome 11:00 AM \u00b7 Nikkah 11:30 AM \u00b7 Valima 12:00 PM (IST)',
       'END:VEVENT',
       'END:VCALENDAR'
     ];

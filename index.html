@@ -326,12 +326,15 @@ section p.label--lg{font-size:20px}
 .countdown.is-done h2{margin-bottom:0}
 .tbox{
   padding:22px 10px;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Plain tint instead of a blurred-glass backdrop: on iPhone the backdrop layer was painted over the top border of each box.
+     The tint is matched to how the glass looked on screen (about 6% white over the dark background). */
+  background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(213, 173, 103, 0.3);
   border-radius: 8px;
-  box-shadow: inset 0 0 12px rgba(213,173,103,0.06);
+  /* First shadow = a thin gold line just inside the top edge. On iPhone the top border row of these boxes has been seen to go
+     missing (a flat cut across the top, side and bottom borders fine); this line sits one pixel lower, so the top edge still
+     reads even if that first row is lost. Where the border does draw, the two just look like a soft glass highlight. */
+  box-shadow: inset 0 1px 0 rgba(213,173,103,0.24), inset 0 0 12px rgba(213,173,103,0.06);
   transition: transform 0.35s var(--ease-fluid), border-color 0.35s ease;
 }
 .tbox:hover {
@@ -704,12 +707,15 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
   <div class="reveal">
     <div class="kicker kicker--gold kicker--m" id="cdKicker">THE BIG DAY IS COMING</div>
     <h2 id="cdTitle">COUNTING DOWN TO FOREVER</h2>
-    <div class="timer">
+    <div class="timer" aria-hidden="true">
       <div class="tbox"><span class="tnum" id="d">--</span><span class="tlabel">DAYS</span></div>
       <div class="tbox"><span class="tnum" id="h">--</span><span class="tlabel">HOURS</span></div>
       <div class="tbox"><span class="tnum" id="m">--</span><span class="tlabel">MINUTES</span></div>
       <div class="tbox"><span class="tnum" id="s">--</span><span class="tlabel">SECONDS</span></div>
     </div>
+    <!-- What screen readers get instead of the boxes above (which would read as "dash dash days"). Not a live region, so it never
+         interrupts; the script refreshes it once a minute. -->
+    <p class="sr-only" id="cdSummary">Counting down to the wedding on Saturday, 26 December 2026.</p>
   </div>
   <div class="scrollhint">SEE HOW THE DAY UNFOLDS
     <span class="scroll-arrow" aria-hidden="true"><svg viewBox="0 0 22 50"><line x1="11" y1="2" x2="11" y2="24"/><path d="M3 26l8 10 8-10"/></svg></span>
@@ -1331,13 +1337,17 @@ const dayEnd = Date.UTC(2026, 11, 26, 18, 30, 0);   // midnight IST at the end o
 const cdSection = document.querySelector(".countdown");
 const cdKicker  = document.getElementById("cdKicker");
 const cdTitle   = document.getElementById("cdTitle");
+const cdSummary = document.getElementById("cdSummary");
+let lastSummary = "";
 let cdState = "before", cdTimer = null;
 function showCountdownMessage(state){
   if(cdState === state) return;
   cdState = state;
   cdSection.classList.add("is-done");
-  if(state === "today"){ cdKicker.textContent = "THE WAIT IS OVER";  cdTitle.textContent = "TODAY'S THE DAY"; }
-  else                  { cdKicker.textContent = "WITH GRATITUDE";    cdTitle.textContent = "THANK YOU FOR THE LOVE"; }
+  if(state === "today"){ cdKicker.textContent = "THE WAIT IS OVER";  cdTitle.textContent = "TODAY'S THE DAY";
+                         if(cdSummary) cdSummary.textContent = "Today is the wedding day."; }
+  else                  { cdKicker.textContent = "WITH GRATITUDE";    cdTitle.textContent = "THANK YOU FOR THE LOVE";
+                         if(cdSummary) cdSummary.textContent = "Thank you for your love and blessings."; }
 }
 function tick(){
   const now = Date.now();
@@ -1352,6 +1362,14 @@ function tick(){
   const mm = Math.floor((diff % 3600000) / 60000);
   const ss = Math.floor((diff % 60000) / 1000);
   const pad = n => String(n).padStart(2,"0");
+  // Sentence for screen readers, refreshed only when the minute changes (it is not announced, just kept correct).
+  if(cdSummary){
+    const words = dd + (dd === 1 ? " day, " : " days, ") + hh + (hh === 1 ? " hour and " : " hours and ") + mm + (mm === 1 ? " minute" : " minutes");
+    if(words !== lastSummary){
+      lastSummary = words;
+      cdSummary.textContent = words + " to go until the wedding on 26 December 2026.";
+    }
+  }
   document.getElementById("d").textContent = dd;
   document.getElementById("h").textContent = pad(hh);
   document.getElementById("m").textContent = pad(mm);
@@ -1967,7 +1985,7 @@ guard('scratch card', function(){
       'UID:nazeem-kifriya-wedding-20261226@invite',
       'DTSTAMP:' + stamp,
       'DTSTART:20261226T053000Z',
-      'DTEND:20261226T073000Z',
+      'DTEND:20261226T103000Z',
       'SUMMARY:Nazeem & Kifriya \u2014 Wedding (Nikkah)',
       'LOCATION:CSI Lite Auditorium\\, 17 Balfour Road\\, Kellys\\, Kilpauk\\, Chennai\\, Tamil Nadu 600010\\, India',
       'DESCRIPTION:Welcome 11:00 AM \u00b7 Nikkah 11:30 AM \u00b7 Valima 12:00 PM (IST)',

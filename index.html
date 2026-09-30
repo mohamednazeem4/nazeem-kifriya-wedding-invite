@@ -306,14 +306,7 @@ section p.label--lg{font-size:20px}
 .reveal-section .lead{font-family:"Cormorant Garamond", serif;font-size:22px;color:var(--text-lead)}
 
 /* Sparkle & Burst Particle Overlay Canvas */
-#scratchEffectCanvas {
-  position: absolute;
-  inset: -60px;
-  width: calc(100% + 120px);
-  height: calc(100% + 120px);
-  pointer-events: none;
-  z-index: 10;
-}
+#scratchEffectCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:8500} /* above the page, below the nav (9000) */
 
 /* ================= COUNTDOWN ================= */
 .countdown{background:linear-gradient(135deg,#2a1219,#542431);text-align:center;padding:110px 20px 90px;display:flex;flex-direction:column;justify-content:center;min-height:60svh;position:relative}
@@ -691,7 +684,6 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
     <p class="label label--tight">SAVE IT, DON'T MISS IT</p>
     <p class="lead">Scratch the heart below to uncover our wedding date.</p>
     <div class="scratch-stage" id="scratchStage">
-      <canvas aria-hidden="true" id="scratchEffectCanvas"></canvas>
       <svg class="heart-card" viewBox="0 0 100 100" aria-hidden="true">
         <path d="M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z" fill="var(--cream)" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round"/>
       </svg>
@@ -869,6 +861,10 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
 
 <!-- Screen-reader status line: announces things that only change a button's text ("link copied" etc.). Must exist from page load. -->
 <div id="srStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Glitter layer for the scratch card: covers the whole screen and lives outside every section, so nothing can clip,
+     move or hide it, and sparks are drawn at the exact screen position of the finger. -->
+<canvas aria-hidden="true" id="scratchEffectCanvas"></canvas>
 
 <script>
 // ---------- SHARED HELPERS ----------
@@ -1623,10 +1619,16 @@ guard('scratch card', function(){
     if(!force && key === lastKey) return;
     lastKey = key;
     cssW = rect.width;  cssH = rect.height;
-    fxW  = cssW + 120;  fxH  = cssH + 120;
     fitCanvas(canvas, ctx, cssW, cssH);
-    fitCanvas(fxCanvas, fxCtx, fxW, fxH);
     drawScratchLayer();
+  }
+
+  // The glitter layer is the size of the screen (see the <canvas> at the end of <body>).
+  function sizeFx(){
+    const w = window.innerWidth, h = window.innerHeight;
+    if(w === fxW && h === fxH) return;
+    fxW = w;  fxH = h;
+    fitCanvas(fxCanvas, fxCtx, fxW, fxH);
   }
 
   function drawScratchLayer(){
@@ -1650,12 +1652,13 @@ guard('scratch card', function(){
   }
 
   sizeCanvas(true);
-  window.addEventListener('resize', function(){ sizeCanvas(false); });
+  sizeFx();
+  window.addEventListener('resize', function(){ sizeCanvas(false); sizeFx(); });
 
   function getPos(e){
     const rect = canvas.getBoundingClientRect();
     const t = e.touches ? e.touches[0] : e;
-    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top, cx: t.clientX, cy: t.clientY };
   }
 
   // Realistic Foil Scratching Engine with Radial Soft Gradients & Textured Speckles
@@ -1706,19 +1709,21 @@ guard('scratch card', function(){
     }
   }
 
-  // Where a point on the scratch canvas is, in effects-canvas pixels. Worked out from the two canvases' real
-  // on-screen rectangles (not an assumed 60px inset), so the sparks land exactly under the finger.
-  function toFx(p){
-    const c = canvas.getBoundingClientRect();
+  // A screen position (clientX / clientY) in glitter-layer pixels. The layer covers the screen from its top-left corner,
+  // so this is the position itself (scaled only if the layer's on-screen size ever differs from its drawing size).
+  function toFx(cx, cy){
     const f = fxCanvas.getBoundingClientRect();
-    const sx = fxW / (f.width  || fxW);
-    const sy = fxH / (f.height || fxH);
-    return { x: (c.left + p.x - f.left) * sx, y: (c.top + p.y - f.top) * sy };
+    return { x: (cx - f.left) * (fxW / (f.width  || fxW)),
+             y: (cy - f.top)  * (fxH / (f.height || fxH)) };
   }
 
   // Glitter where the finger is: it starts on the piece of stroke just drawn and bursts outward in every direction,
   // staying within a fingertip's width or two. (It used to be thrown backwards along the swipe, so on a phone,
   // where swipes are fast, it landed far behind the finger.)
+  // Light gold alone disappears on the gold foil and on the cream: mix deep gold (shows on light), bright gold and a warm
+  // near-white (shows on the darker foil) so some sparks are always visible whatever they are drawn over.
+  const SPARK_COLORS = ['#a9741a', '#c8901f', '#e0a936', '#f4c95d', '#fff3c4', '#ffffff'];
+
   function addVelocityParticles(p1, p2) {
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
@@ -1726,8 +1731,8 @@ guard('scratch card', function(){
     if (speed < 0.5 || reducedMotion()) return;
     ensureFX();
 
-    const a = toFx(p1);
-    const b = toFx(p2);
+    const a = toFx(p1.cx, p1.cy);
+    const b = toFx(p2.cx, p2.cy);
     const pCount = Math.min(Math.floor(speed * 0.4) + 2, 8);
     for (let i = 0; i < pCount; i++) {
       const t = Math.random();
@@ -1744,10 +1749,10 @@ guard('scratch card', function(){
         g: 0.03,                                         // lighter than the confetti's gravity
         dragY: 0.96,
         fade: 0.04,                                      // ~25 frames (0.4s): a quick flash, not a lingering trail
-        size: Math.random() * 3 + 1,
+        size: Math.random() * 2.2 + 1.6,
         alpha: 1,
         type: Math.random() > 0.3 ? 'foil-dust' : 'trail-spark',
-        color: `hsl(${38 + Math.random() * 14}, 75%, ${55 + Math.random() * 30}%)`
+        color: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)]
       });
     }
   }
@@ -1755,8 +1760,10 @@ guard('scratch card', function(){
   function triggerAutoRevealBurst(){
     if(reducedMotion()) return;
     ensureFX();
-    const centerX = fxW / 2;
-    const centerY = fxH / 2;
+    const r = canvas.getBoundingClientRect();
+    const c = toFx(r.left + r.width / 2, r.top + r.height / 2);
+    const centerX = c.x;
+    const centerY = c.y;
 
     for(let i = 0; i < 50; i++){
       const angle = Math.random() * Math.PI * 2;

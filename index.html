@@ -50,6 +50,7 @@
   --ease-fluid: cubic-bezier(0.25, 1, 0.5, 1);
   --gold-deep:#8c6a46; /* gold that stays readable on the cream sections */
   --gold-text:#785b3c; /* darker gold for small text on cream-deep (4.8:1; --gold-deep was 3.8:1 there) */
+  --text-lead:#745a61; /* --text-soft darkened a touch for the cream-deep section (4.46:1 -> 4.8:1) */
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -140,7 +141,6 @@ img{max-width:100%}
 .amp{font-family:'Great Vibes',cursive;display:inline-block}
 .reveal{opacity:0;transform:translateY(35px);transition:opacity .9s ease,transform .9s var(--ease-fluid)}
 .reveal.show{opacity:1;transform:none}
-@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important;scroll-behavior:auto!important}.glass-card::after,.glass-card-light::after{animation:none}}
 
 
@@ -219,6 +219,8 @@ img{max-width:100%}
 
 /* ================= ENTRANCE ================= */
 .entrance{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#160b0f;overflow:hidden;touch-action:none;overscroll-behavior:none;transition:opacity .9s cubic-bezier(.25,.6,.3,1),visibility .9s linear}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the entrance can't scroll; removed when it opens */
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
 .entrance-video,.entrance-poster{grid-area:1/1;width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
@@ -228,6 +230,10 @@ img{max-width:100%}
 .entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
 .entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
 .entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video,.entrance-stage:hover .entrance-poster,.entrance-stage:focus .entrance-poster{transform:scale(1.01)}
+/* Keyboard focus: the hairline frame (the :after above) becomes a clear gold ring, only for keyboard users (:focus-visible),
+   so Tab shows where you are and that Enter / Space opens the invitation. It sits above the video, so nothing can cover it. */
+.entrance-stage:focus-visible:after{border:3px solid var(--gold);box-shadow:inset 0 0 0 1px rgba(22,11,15,.75),0 0 0 1px rgba(22,11,15,.75),inset 0 0 80px rgba(0,0,0,.18)}
+.entrance.entering .entrance-stage:focus-visible:after{border-color:transparent;box-shadow:none} /* ring gets out of the way once it opens */
 /* the video no longer fades to black on its own - the whole overlay dissolves into the hero instead (no dark gap) */
 .entrance.entering .entrance-video,.entrance.entering .entrance-poster{transform:scale(1.07);filter:blur(6px) brightness(1.15)}
 @media(max-width:650px){
@@ -270,7 +276,7 @@ h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1
 .scroll-arrow path{stroke:var(--gold);stroke-width:3.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
 @keyframes arrowPulse{0%,100%{opacity:.25}50%{opacity:1}}
 /* hint on the light (cream) slides: darker text + deeper gold arrow so it stays readable */
-.scrollhint--light{color:var(--text-soft);opacity:.9}
+.scrollhint--light{color:var(--text-soft);opacity:1} /* was .9: dimming pushed the hint text under 4.5:1 */
 .scrollhint--light .scroll-arrow line,.scrollhint--light .scroll-arrow path{stroke:var(--gold-deep)}
 /* small heart inside a hint line */
 .scrollhint .ico{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.15em;margin-left:.45em;color:var(--rose)}
@@ -279,7 +285,7 @@ h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1
 .intro{background:var(--cream);color:var(--text);display:grid;place-items:center;text-align:center;padding:110px 24px 90px;min-height:70svh;position:relative}
 .intro-inner{max-width:640px;padding:36px 28px}
 .intro h2,.venue h2,.closing h2,.schedule h2,.reveal-section h2{font-family:"Cormorant Garamond", serif;font-weight:400;font-size:clamp(38px,6.5vw,58px);margin:14px 0;color:var(--rose)}
-.intro p,.closing p{font-family:"Cormorant Garamond", serif;font-size:28px;line-height:1.65}
+.intro p,.closing p{font-family:"Cormorant Garamond", serif;font-size:24px;line-height:1.65}
 /* small uppercase labels (were inline styles; selector is strong enough to beat `.intro p`) */
 section p.label{font-family:Montserrat,sans-serif;font-size:16px;letter-spacing:3px;text-transform:uppercase}
 section p.label--tight{letter-spacing:2px}
@@ -296,7 +302,8 @@ section p.label--lg{font-size:20px}
 .scratch-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;transition:opacity .8s ease}
 .scratch-hint{font-size:14px;letter-spacing:3px;color:var(--gold-text);margin-top:16px;transition:opacity 0.5s ease}
 .scratch-hint .ico{display:inline-block;width:.8em;height:.8em;vertical-align:-.04em;margin:0 .6em}
-.reveal-section .lead{font-family:"Cormorant Garamond", serif;font-size:22px;color:var(--text-soft)}
+.reveal-section{--text-soft:#745a61} /* darker soft text on this darker cream: lead was 4.46:1, now 4.8:1 */
+.reveal-section .lead{font-family:"Cormorant Garamond", serif;font-size:22px;color:var(--text-lead)}
 
 /* Sparkle & Burst Particle Overlay Canvas */
 #scratchEffectCanvas {
@@ -403,7 +410,6 @@ section p.label--lg{font-size:20px}
 .t-title{font-family:"Cormorant Garamond", serif;font-weight:700;font-size:22px;color:var(--text-soft);line-height:1.2}
 .t-sub{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;font-weight:500;line-height:1.35}
 @media(max-width:400px){
-  .timeline{column-gap:0}
   .t-row{column-gap:9px}
   .t-mark{width:52px;height:52px}
   .t-mark svg{width:32px;height:32px}
@@ -566,6 +572,19 @@ section { overflow-x: clip; }
   .glass-card, .glass-card-light { max-width: calc(100vw - 28px); }
 }
 
+/* ================= SAFE AREAS (notched phones in landscape; viewport-fit=cover) ================= */
+/* Each rule keeps the normal side padding and only grows it where the notch / rounded corner needs more.
+   Backgrounds still run edge to edge. Browsers without env()/max() skip these lines and keep the original padding. */
+.quick-nav{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.intro,.dua{padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.reveal-section,.countdown{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.schedule,.venue,.closing{padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px))}
+footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padding-right:max(clamp(10px,3vw,25px),env(safe-area-inset-right,0px))}
+@media(max-width:650px){
+  .quick-nav{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+  .dua{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+}
+
 </style>
 <noscript><style>.entrance{display:none}.bismillah,.monogram,h1,.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
@@ -579,7 +598,7 @@ section { overflow-x: clip; }
 </svg>
 
 <!-- GLOBAL AMBIENT OVERLAY CANVAS (BOKEH + LEAF DRIFT OVER ENTIRE PAGE & BOXES) -->
-<canvas id="globalAmbientCanvas"></canvas>
+<canvas aria-hidden="true" id="globalAmbientCanvas"></canvas>
 
 <!-- STICKY QUICK-NAVIGATION BAR -->
 <nav class="quick-nav" id="quickNav">
@@ -637,9 +656,10 @@ section { overflow-x: clip; }
 })();
 </script>
 
+<main>
 <section class="opening" id="home">
   <!-- BOKEH CANVAS -->
-  <canvas id="heroBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
+  <canvas aria-hidden="true" id="heroBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
 
   <div class="content parallax-fg" data-speed="-0.15">
     <div class="bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
@@ -652,7 +672,7 @@ section { overflow-x: clip; }
 </section>
 
 <section class="intro" id="welcome">
-  <canvas id="introCanvas" class="parallax-bg" data-speed="0.2"></canvas>
+  <canvas aria-hidden="true" id="introCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="intro-inner glass-card-light reveal">
     <div class="flower" aria-hidden="true"><svg class="ico"><use href="#ic-star"/></svg></div>
     <p class="label">WITH JOY IN OUR HEARTS</p>
@@ -665,20 +685,20 @@ section { overflow-x: clip; }
 </section>
 
 <section class="reveal-section" id="date">
-  <canvas id="revealCanvas" class="parallax-bg" data-speed="0.2"></canvas>
+  <canvas aria-hidden="true" id="revealCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="reveal">
     <h2>OUR DATE DROP</h2>
     <p class="label label--tight">SAVE IT, DON'T MISS IT</p>
     <p class="lead">Scratch the heart below to uncover our wedding date.</p>
     <div class="scratch-stage" id="scratchStage">
-      <canvas id="scratchEffectCanvas"></canvas>
+      <canvas aria-hidden="true" id="scratchEffectCanvas"></canvas>
       <svg class="heart-card" viewBox="0 0 100 100" aria-hidden="true">
         <path d="M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z" fill="var(--cream)" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round"/>
       </svg>
       <div class="scratch-under">
         <div class="rdate">26th<br>December<br>2026</div>
       </div>
-      <canvas class="scratch-canvas heart-mask" id="scratchCanvas"></canvas>
+      <canvas aria-hidden="true" class="scratch-canvas heart-mask" id="scratchCanvas"></canvas>
     </div>
     <div class="scratch-hint" id="scratchHint"><svg class="ico" aria-hidden="true"><use href="#ic-star"/></svg>SCRATCH TO REVEAL<svg class="ico" aria-hidden="true"><use href="#ic-star"/></svg></div>
   </div>
@@ -688,7 +708,7 @@ section { overflow-x: clip; }
 </section>
 
 <section class="countdown">
-  <canvas id="countdownBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
+  <canvas aria-hidden="true" id="countdownBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="reveal">
     <div class="kicker kicker--gold kicker--m" id="cdKicker">THE BIG DAY IS COMING</div>
     <h2 id="cdTitle">COUNTING DOWN TO FOREVER</h2>
@@ -705,7 +725,7 @@ section { overflow-x: clip; }
 </section>
 
 <section class="schedule" id="schedule">
-  <canvas id="scheduleCanvas" class="parallax-bg" data-speed="0.2"></canvas>
+  <canvas aria-hidden="true" id="scheduleCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="schedule-inner glass-card-light reveal">
     <p class="label label--lg">THE CELEBRATION</p>
     <h2>Order of the day</h2>
@@ -780,7 +800,7 @@ section { overflow-x: clip; }
       </div>
     </div>
     <div class="cal-row">
-      <a class="btn-gold-outline" id="addToCal" href="#">ADD TO CALENDAR</a>
+      <button class="btn-gold-outline" id="addToCal" type="button">ADD TO CALENDAR</button>
       <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T073000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Valima%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
     </div>
   </div>
@@ -790,7 +810,7 @@ section { overflow-x: clip; }
 </section>
 
 <section class="venue" id="venue">
-  <canvas id="venueBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
+  <canvas aria-hidden="true" id="venueBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="venue-inner glass-card reveal">
     <h2>THE VENUE</h2>
     <div class="venue-name">CSI Lite Auditorium</div>
@@ -806,7 +826,7 @@ section { overflow-x: clip; }
       <div>
         <div class="kicker kicker--gold kicker--s">EXACT LOCATION</div>
         <p class="location-note">Scan the QR code or tap below to open the exact venue location in Google Maps.</p>
-        <a class="map-button" href="https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877&entry=gps&shh=CAE&lucs=,94297699,94231188,94280568,47071704,94218641,94282134,100813464,94286869,100820247,100822504&g_ep=CAISEjI2LjMzLjEuOTYxODkxNDMyMBgAIIgnKl0sOTQyOTc2OTksOTQyMzExODgsOTQyODA1NxgsNDcwNzE3MDQsOTQyMTg2NDEsOTQyODIxQsMTAwODEzNDY0LDk0Mjg2ODY5LDEwMDgyMDI0NywxMDA8MjI1MDRCAlVT&skid=c9d93274-e58c-40e8-970e-d4b0c6a31031&g_st=ic" target="_blank" rel="noopener">OPEN IN GOOGLE MAPS ↗</a>
+        <a class="map-button" href="https://www.google.com/maps?q=CSI+LITE+Auditorium,+17,+Balfour+Road,+behind+CSI+BAIN+MATRIC+HIGHER+SECONDARY+SCHOOL,+Kellys,+Kilpauk,+Chennai,+Tamil+Nadu+600010,+India&amp;ftid=0x3a5265d83442b1d3:0xd1c8ec109f5bf877" target="_blank" rel="noopener">OPEN IN GOOGLE MAPS ↗</a>
         <button class="btn-ghost-gold" id="copyAddress" type="button">COPY ADDRESS</button>
       </div>
     </div>
@@ -817,7 +837,7 @@ section { overflow-x: clip; }
 </section>
 
 <section class="dua" id="dua">
-  <canvas id="duaBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
+  <canvas aria-hidden="true" id="duaBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="dua-inner glass-card reveal">
     <div class="flower flower--still" aria-hidden="true"><svg class="ico"><use href="#ic-moon"/></svg></div>
     <div class="kicker kicker--gold kicker--m">A PRAYER FOR US</div>
@@ -832,7 +852,7 @@ section { overflow-x: clip; }
 </section>
 
 <section class="closing">
-  <canvas id="closingCanvas" class="parallax-bg" data-speed="0.2"></canvas>
+  <canvas aria-hidden="true" id="closingCanvas" class="parallax-bg" data-speed="0.2"></canvas>
   <div class="reveal">
     <div class="flower flower--still" aria-hidden="true"><svg class="ico"><use href="#ic-heart"/></svg></div>
     <div class="kicker kicker--l">WITH LOVE</div>
@@ -844,9 +864,51 @@ section { overflow-x: clip; }
   <div class="scrollhint scrollhint--light">THANK YOU FOR BEING PART OF OUR STORY<svg class="ico" aria-hidden="true"><use href="#ic-heart"/></svg>
   </div>
 </section>
+</main>
 <footer><span class="foot-line">MOHAMED NAZEEM &amp; KIFRIYA MUQSIN &nbsp; | &nbsp; 26 · 12 · 2026</span></footer>
 
+<!-- Screen-reader status line: announces things that only change a button's text ("link copied" etc.). Must exist from page load. -->
+<div id="srStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
 <script>
+// ---------- SHARED HELPERS ----------
+const reducedMotionMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+function reducedMotion(){ return !!(reducedMotionMQ && reducedMotionMQ.matches); }
+
+// Each feature runs on its own: if one throws, the others (and the page itself) still work.
+function guard(name, fn, onFail){
+  try{ fn(); }
+  catch(err){
+    console.warn(name + ' skipped:', err);
+    if(onFail){ try{ onFail(); }catch(_){} }
+  }
+}
+
+// Canvases are drawn in CSS pixels but backed by a sharper bitmap on retina screens (capped at 2x so phones stay smooth).
+function canvasScale(){ return Math.min(window.devicePixelRatio || 1, 2); }
+function fitCanvas(canvas, ctx, cssW, cssH){
+  const k = canvasScale();
+  canvas.width  = Math.max(1, Math.round(cssW * k));   // assigning a size also wipes the canvas and resets its transform
+  canvas.height = Math.max(1, Math.round(cssH * k));
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+}
+// Sizes a section canvas to its parent section. Returns {w,h} in CSS pixels, or null when nothing changed
+// (so a redundant resize never wipes the canvas).
+function sizeToParent(canvas, ctx){
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const key = rect.width + 'x' + rect.height + '@' + canvasScale();
+  if(canvas._sizeKey === key) return null;
+  canvas._sizeKey = key;
+  fitCanvas(canvas, ctx, rect.width, rect.height);
+  return { w: rect.width, h: rect.height };
+}
+// Calls fn whenever el's size changes (fonts / images loading can change a section's height without any window resize).
+function observeSize(el, fn){
+  if(!el) return;
+  if('ResizeObserver' in window) new ResizeObserver(function(){ fn(); }).observe(el);
+  else window.addEventListener('load', fn);
+}
+
 // ---------- GLOBAL OVERLAY: BOKEH & LEAF DRIFT EFFECT ----------
 try { (function initGlobalAmbient() {
   const canvas = document.getElementById('globalAmbientCanvas');
@@ -855,8 +917,9 @@ try { (function initGlobalAmbient() {
   let width, height;
 
   function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+    width = window.innerWidth;
+    height = window.innerHeight;
+    fitCanvas(canvas, ctx, width, height);
   }
   window.addEventListener('resize', resize);
   resize();
@@ -956,13 +1019,29 @@ try { (function initGlobalAmbient() {
     leafParticles.forEach(p => { p.update(); p.draw(); });
     requestAnimationFrame(animateGlobal);
   }
-  animateGlobal();
+  if (reducedMotion()) {
+    // Reduced motion: one still frame of soft light, no drifting; repainted after a resize wipes the canvas.
+    function drawStill() {
+      ctx.clearRect(0, 0, width, height);
+      bokehParticles.forEach(p => p.draw());
+      leafParticles.forEach(p => p.draw());
+    }
+    drawStill();
+    window.addEventListener('resize', drawStill);
+  } else {
+    animateGlobal();
+  }
 })(); } catch (err) { console.warn('Ambient effect skipped:', err); }
 
 // ---------- RUN A CANVAS LOOP ONLY WHILE ITS SECTION IS ON SCREEN ----------
 // Ten canvases animating at once is heavy on mid-range phones; only the ones near the viewport get frames.
 // The observer watches the section (not the canvas, which is moved by the parallax script).
 function runWhileVisible(target, step){
+  // Reduced motion: paint one still frame instead of animating. The returned function repaints it after a resize.
+  if(reducedMotion()){
+    step();
+    return function redraw(){ step(); };
+  }
   let running = false, visible = true;
   function frame(){
     if(!visible){ running = false; return; }
@@ -981,6 +1060,7 @@ function runWhileVisible(target, step){
     }, { rootMargin: '150px 0px' }).observe(target);
   }
   start();
+  return function redraw(){};   // animating: the next frame repaints anyway
 }
 
 // ---------- MULTI-SECTION BOKEH EFFECT ENGINE (DARK PAGES) ----------
@@ -991,12 +1071,15 @@ function initBokehEffect(canvasId, palette = ['213, 173, 103', '233, 207, 160', 
   let width, height;
   let particles = [];
 
+  let redraw = function(){};                     // set below: repaints the still frame after a resize (reduced motion)
   function resize(){
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = canvas.width = rect.width;
-    height = canvas.height = rect.height;
+    const sz = sizeToParent(canvas, ctx);        // null when nothing changed
+    if(!sz) return;
+    width = sz.w; height = sz.h;
+    redraw();
   }
   window.addEventListener('resize', resize);
+  observeSize(canvas.parentElement, resize);     // also when fonts / images change the section's height
   resize();
 
   class Particle {
@@ -1047,7 +1130,7 @@ function initBokehEffect(canvasId, palette = ['213, 173, 103', '233, 207, 160', 
     particles.push(new Particle());
   }
 
-  runWhileVisible(canvas.parentElement, function(){
+  redraw = runWhileVisible(canvas.parentElement, function(){
     ctx.clearRect(0, 0, width, height);
     particles.forEach(p => {
       p.update();
@@ -1064,12 +1147,15 @@ function initPetalEffect(canvasId) {
   let width, height;
   let petals = [];
 
+  let redraw = function(){};                     // set below: repaints the still frame after a resize (reduced motion)
   function resize(){
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = canvas.width = rect.width;
-    height = canvas.height = rect.height;
+    const sz = sizeToParent(canvas, ctx);        // null when nothing changed
+    if(!sz) return;
+    width = sz.w; height = sz.h;
+    redraw();
   }
   window.addEventListener('resize', resize);
+  observeSize(canvas.parentElement, resize);     // also when fonts / images change the section's height
   resize();
 
   class Petal {
@@ -1111,7 +1197,7 @@ function initPetalEffect(canvasId) {
     petals.push(new Petal());
   }
 
-  runWhileVisible(canvas.parentElement, function(){
+  redraw = runWhileVisible(canvas.parentElement, function(){
     ctx.clearRect(0, 0, width, height);
     petals.forEach(p => {
       p.update();
@@ -1143,9 +1229,27 @@ const envelope = document.getElementById("envelope");
 const entranceVideo = document.getElementById("entranceVideo");
 const entrance = document.getElementById("entrance");
 
+// ---------- KEEP THE PAGE BEHIND THE ENTRANCE OUT OF REACH ----------
+// While the overlay is up, the page underneath must not take keyboard focus, be read by a screen reader, or scroll.
+// "inert" covers the first two; a class on <html> (CSS: overflow hidden) stops the scrolling.
+function pageShell(){
+  return Array.prototype.slice.call(document.querySelectorAll('#quickNav, main, footer, #progressDots'));
+}
+function lockPage(){
+  pageShell().forEach(function(el){ el.setAttribute('inert', ''); });
+  document.documentElement.classList.add('entrance-lock');
+}
+function unlockPage(){
+  pageShell().forEach(function(el){ el.removeAttribute('inert'); });
+  document.documentElement.classList.remove('entrance-lock');
+  // On desktop the scrollbar comes back now: let the fit-to-width scripts and canvases re-measure.
+  requestAnimationFrame(function(){ window.dispatchEvent(new Event('resize')); });
+}
+
 function openInvitation(){
   if(entrance.classList.contains("entering")) return;
-  // The guest may have scrolled the page behind the overlay (wheel / keyboard / browser scroll-restore): always land on the hero.
+  try{ unlockPage(); }catch(_){}   // never let this get in the way of opening
+  // The page is scroll-locked behind the overlay, but a reload can restore an old scroll position: always land on the hero.
   // "instant" overrides html{scroll-behavior:smooth}, so it jumps instead of gliding while the overlay dissolves.
   try{ window.scrollTo({top:0, left:0, behavior:"instant"}); }catch(_){ window.scrollTo(0,0); }
   entrance.classList.add("entering", "hidden");  // video eases out while the whole overlay dissolves...
@@ -1221,7 +1325,11 @@ envelope.addEventListener("keydown", e => {
   if(e.key === "Enter" || e.key === " "){ e.preventDefault(); startEntrance(); }
 });
 
+// Last step of the entrance setup, so the handlers above are always in place before the page is locked.
+guard('lock page behind entrance', lockPage);
+
 // ---------- COUNTDOWN ----------
+guard('countdown', function(){
 const target = Date.UTC(2026, 11, 26, 6, 0, 0);     // 26 Dec 2026, 11:30 AM IST (the Nikkah)
 const dayEnd = Date.UTC(2026, 11, 26, 18, 30, 0);   // midnight IST at the end of 26 Dec
 const cdSection = document.querySelector(".countdown");
@@ -1256,14 +1364,21 @@ function tick(){
   sEl.classList.remove("tick"); void sEl.offsetWidth; sEl.classList.add("tick");  // subtle pulse each second
 }
 tick(); cdTimer = setInterval(tick, 1000);
+});
 
 // ---------- SCROLL REVEALS ----------
-const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add("show"); }), {threshold:.12});
-document.querySelectorAll(".reveal").forEach(e => io.observe(e));
+// Most important guard: if anything here fails, every card is shown instead of staying invisible.
+function showAllCards(){ document.querySelectorAll(".reveal").forEach(e => e.classList.add("show")); }
+guard('scroll reveals', function(){
+  if(!('IntersectionObserver' in window)){ showAllCards(); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add("show"); }), {threshold:.12});
+  document.querySelectorAll(".reveal").forEach(e => io.observe(e));
+}, showAllCards);
 
 // ---------- PARALLAX + NAV HIGHLIGHT ----------
 // Positions are measured once (and again on resize / font load); the scroll handler only
 // does cheap maths and runs at most once per animation frame, so scrolling never forces layout.
+guard('parallax and nav highlight', function(){
 const navLinks = document.querySelectorAll('.quick-nav-links a');
 
 // ---------- SIDE PROGRESS DOTS (mirrors the quick-nav links; desktop only via CSS) ----------
@@ -1307,7 +1422,7 @@ function applyScroll(){
   scrollFramePending = false;
   const scrollTop = window.pageYOffset;
 
-  for (const p of parallaxItems){
+  for (const p of (reducedMotion() ? [] : parallaxItems)){   // no parallax drift under reduced motion
     if (scrollTop + viewH > p.top && scrollTop < p.bottom){
       p.el.style.transform = `translate3d(0, ${(scrollTop - p.top) * p.speed}px, 0)`;
     }
@@ -1338,10 +1453,11 @@ window.addEventListener('resize', remeasure);
 window.addEventListener('load', remeasure);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
 remeasure();
+});
 
 // ---------- DUA: keep the Arabic on ONE line at every screen size ----------
 // Measures the full line at a large reference size, then scales the font so it fits the card exactly.
-(function fitDuaToOneLine(){
+guard('dua fit', function fitDuaToOneLine(){
   const line = document.querySelector('.dua-arabic');
   const text = line && line.querySelector('.dua-fit');
   if (!line || !text) return;
@@ -1368,11 +1484,11 @@ remeasure();
     if (document.fonts.load) document.fonts.load('27px "Scheherazade New"', text.textContent).then(schedule).catch(function(){});
     if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
   }
-})();
+});
 
 // ---------- NAV: brand + all links always visible on ONE row ----------
 // At full size when there is room; on narrow screens everything (text, spacing, gaps) scales down together.
-(function fitNav(){
+guard('nav fit', function fitNav(){
   const nav = document.getElementById('quickNav');
   const brand = nav && nav.querySelector('.quick-nav-brand');
   const links = nav && nav.querySelector('.quick-nav-links');
@@ -1400,12 +1516,12 @@ remeasure();
     if (document.fonts.ready) document.fonts.ready.then(schedule);
     if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
   }
-})();
+});
 
 // ---------- FOOTER: one line on every screen ----------
 // Full size (12px, wide letter-spacing) when there is room. Otherwise the letter-spacing tightens first,
 // and only then does the font shrink, so the line keeps a refined look for as long as possible.
-(function fitFooterToOneLine(){
+guard('footer fit', function fitFooterToOneLine(){
   const footer = document.querySelector('footer');
   const text = footer && footer.querySelector('.foot-line');
   if (!footer || !text) return;
@@ -1442,13 +1558,13 @@ remeasure();
     if (document.fonts.ready) document.fonts.ready.then(schedule);
     if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
   }
-})();
+});
 
 // ---------- CLOSING NAMES: each name stays on ONE line at every screen size ----------
 // Measures the names at a large reference size, then sizes the heading so the widest name fits the section
 // (52px on roomy screens, smaller on phones). Room is measured on the section, not the heading, because the
 // heading's own width grows with its no-wrap text.
-(function fitClosingNames(){
+guard('closing names', function fitClosingNames(){
   const h2 = document.querySelector('.closing h2');
   const section = h2 && h2.closest('section');
   const lines = h2 ? h2.querySelectorAll('.close-line') : [];
@@ -1477,10 +1593,10 @@ remeasure();
     if (document.fonts.ready) document.fonts.ready.then(schedule);
     if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
   }
-})();
+});
 
 // ---------- ENHANCED SCRATCH CARD ENGINE WITH RADIAL GRADIENTS & VELOCITY TRAILS ----------
-(function(){
+guard('scratch card', function(){
   const canvas = document.getElementById('scratchCanvas');
   const stage = document.getElementById('scratchStage');
   const hint = document.getElementById('scratchHint');
@@ -1491,25 +1607,30 @@ remeasure();
   let revealed = false;
   let sparkles = [];
   let lastPos = null;
+  let cssW = 0, cssH = 0, fxW = 0, fxH = 0;   // sizes in CSS pixels (the bitmaps are larger on retina screens)
 
-  let lastW = -1;
+  // The heart is drawn as a path (same shape as the SVG heart): a "♥" text character can turn into a colour emoji on some phones.
+  const HEART_PATH = (typeof Path2D === 'function')
+    ? new Path2D('M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z')
+    : null;
+
+  let lastKey = '';
   function sizeCanvas(force){
     const rect = canvas.getBoundingClientRect();
+    const key = Math.round(rect.width) + '@' + canvasScale();
     // Mobile URL-bar show/hide fires "resize" with only the height changing; resizing a canvas wipes it,
-    // which would put the foil back on a half-scratched heart. Ignore height-only changes.
-    if(!force && Math.round(rect.width) === lastW) return;
-    lastW = Math.round(rect.width);
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    fxCanvas.width = rect.width + 120;
-    fxCanvas.height = rect.height + 120;
-
+    // which would put the foil back on a half-scratched heart. Only rebuild when the width (or pixel ratio) changed.
+    if(!force && key === lastKey) return;
+    lastKey = key;
+    cssW = rect.width;  cssH = rect.height;
+    fxW  = cssW + 120;  fxH  = cssH + 120;
+    fitCanvas(canvas, ctx, cssW, cssH);
+    fitCanvas(fxCanvas, fxCtx, fxW, fxH);
     drawScratchLayer();
   }
 
   function drawScratchLayer(){
-    const w = canvas.width, h = canvas.height;
+    const w = cssW, h = cssH;
     ctx.globalCompositeOperation = 'source-over';
     const grad = ctx.createLinearGradient(0,0,w,h);
     grad.addColorStop(0, '#e9cfa0');
@@ -1585,48 +1706,57 @@ remeasure();
     }
   }
 
-  // Particle Trails driven by motion velocity
+  // Where a point on the scratch canvas is, in effects-canvas pixels. Worked out from the two canvases' real
+  // on-screen rectangles (not an assumed 60px inset), so the sparks land exactly under the finger.
+  function toFx(p){
+    const c = canvas.getBoundingClientRect();
+    const f = fxCanvas.getBoundingClientRect();
+    const sx = fxW / (f.width  || fxW);
+    const sy = fxH / (f.height || fxH);
+    return { x: (c.left + p.x - f.left) * sx, y: (c.top + p.y - f.top) * sy };
+  }
+
+  // Glitter where the finger is: it starts on the piece of stroke just drawn and bursts outward in every direction,
+  // staying within a fingertip's width or two. (It used to be thrown backwards along the swipe, so on a phone,
+  // where swipes are fast, it landed far behind the finger.)
   function addVelocityParticles(p1, p2) {
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
     const speed = Math.hypot(dx, dy);
-    if (speed < 0.5) return;
+    if (speed < 0.5 || reducedMotion()) return;
     ensureFX();
 
-    const normX = dx / speed;
-    const normY = dy / speed;
-
-    const pCount = Math.min(Math.floor(speed * 0.6) + 2, 12);
+    const a = toFx(p1);
+    const b = toFx(p2);
+    const pCount = Math.min(Math.floor(speed * 0.4) + 2, 8);
     for (let i = 0; i < pCount; i++) {
-      const offsetPos = Math.random();
-      const originX = p1.x + dx * offsetPos + 60; // Compensate for fxCanvas inset padding
-      const originY = p1.y + dy * offsetPos + 60;
-
-      // Backward velocity trail + random scatter
-      const spreadAngle = (Math.random() - 0.5) * 1.2;
-      const pSpeed = (Math.random() * 0.8 + 0.2) * (speed * 0.25);
-      const vx = -normX * pSpeed * Math.cos(spreadAngle) + (Math.random() - 0.5) * 1.5;
-      const vy = -normY * pSpeed * Math.sin(spreadAngle) + (Math.random() - 0.5) * 1.5 - 0.5;
+      const t = Math.random();
+      const angle = Math.random() * Math.PI * 2;
+      const pSpeed = Math.random() * 1.4 + 0.6;          // px per frame; with the drag below that is ~10-30px of travel
+      const vx = Math.cos(angle) * pSpeed;
+      const vy = Math.sin(angle) * pSpeed - 0.3;         // a slight lift so it sparkles upward
 
       sparkles.push({
-        x: originX,
-        y: originY,
+        x: a.x + (b.x - a.x) * t,
+        y: a.y + (b.y - a.y) * t,
         vx: vx,
         vy: vy,
+        g: 0.03,                                         // lighter than the confetti's gravity
+        dragY: 0.96,
+        fade: 0.04,                                      // ~25 frames (0.4s): a quick flash, not a lingering trail
         size: Math.random() * 3 + 1,
-        length: Math.random() * 6 + 3,
         alpha: 1,
         type: Math.random() > 0.3 ? 'foil-dust' : 'trail-spark',
-        angle: Math.atan2(vy, vx),
         color: `hsl(${38 + Math.random() * 14}, 75%, ${55 + Math.random() * 30}%)`
       });
     }
   }
 
   function triggerAutoRevealBurst(){
+    if(reducedMotion()) return;
     ensureFX();
-    const centerX = fxCanvas.width / 2;
-    const centerY = fxCanvas.height / 2;
+    const centerX = fxW / 2;
+    const centerY = fxH / 2;
 
     for(let i = 0; i < 50; i++){
       const angle = Math.random() * Math.PI * 2;
@@ -1648,19 +1778,20 @@ remeasure();
 
   let fxRunning = false;
   function ensureFX(){                       // start the loop only when there is something to draw
-    if(fxRunning) return;
+    if(fxRunning || reducedMotion()) return;   // no sparks / confetti under reduced motion
     fxRunning = true;
     requestAnimationFrame(animateFX);
   }
   function animateFX(){
-    fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+    fxCtx.clearRect(0, 0, fxW, fxH);
     for(let i = sparkles.length - 1; i >= 0; i--){
       const p = sparkles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.08; // subtle gravity
+      p.vy += (p.g !== undefined ? p.g : 0.08); // subtle gravity
       p.vx *= 0.96; // drag friction
-      p.alpha -= 0.025;
+      if(p.dragY) p.vy *= p.dragY;              // scratch sparks slow down vertically too, so they stay near the finger
+      p.alpha -= (p.fade || 0.025);
 
       if(p.alpha <= 0){
         sparkles.splice(i, 1);
@@ -1689,8 +1820,14 @@ remeasure();
         p.rotation += p.vRot;
         fxCtx.rotate(p.rotation);
         fxCtx.fillStyle = p.color;
-        fxCtx.font = `${p.size}px serif`;
-        fxCtx.fillText('♥', -p.size/2, p.size/2);
+        if(HEART_PATH){
+          const k = p.size / 88;               // the heart path is about 88 units wide
+          fxCtx.scale(k, k);
+          fxCtx.translate(-50, -50);           // centre it on the particle
+          fxCtx.fill(HEART_PATH);
+        } else {
+          fxCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+        }
       } else {
         fxCtx.translate(p.x, p.y);
         p.rotation += p.vRot;
@@ -1704,8 +1841,12 @@ remeasure();
     else fxRunning = false;                  // idle: no frames until the next scratch / burst
   }
 
-  function checkCleared(){
+  let lastCheck = 0;
+  function checkCleared(force){
     if(revealed) return;
+    const now = Date.now();
+    if(!force && now - lastCheck < 120) return;
+    lastCheck = now;
     const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
     let cleared = 0, total = 0;
     for(let i=3;i<data.length;i+=4*40){
@@ -1738,8 +1879,9 @@ remeasure();
     lastPos = p;
     checkCleared();
   }
-  function end(){ 
-    drawing = false; 
+  function end(){
+    if(drawing) checkCleared(true);
+    drawing = false;
     lastPos = null;
   }
 
@@ -1749,7 +1891,8 @@ remeasure();
   canvas.addEventListener('touchstart', start, {passive:true});
   canvas.addEventListener('touchmove', move, {passive:false});
   canvas.addEventListener('touchend', end);
-})();
+  canvas.addEventListener('touchcancel', end);   // an interrupted touch must not leave scratching switched on
+});
 </script>
 
 <script>
@@ -1782,7 +1925,26 @@ remeasure();
 <script>
 /* V8 — Add to Calendar (.ics download) + Share invitation */
 (function () {
+  // Tell screen readers something happened. Clearing first makes an identical message (a second copy) announce again.
+  window.announceStatus = function (msg) {
+    var el = document.getElementById('srStatus');
+    if (!el) return;
+    el.textContent = '';
+    setTimeout(function () { el.textContent = msg; }, 60);
+    setTimeout(function () { if (el.textContent === msg) el.textContent = ''; }, 4000);
+  };
+
   // Build a real calendar file on the fly: 26 Dec 2026, 11:00 AM–1:00 PM IST (05:30–07:30 UTC).
+  // Calendar files must not have lines longer than 75 bytes: longer ones are folded (CRLF + one space continues the line).
+  function fold(line){
+    var out = '', used = 0;
+    for (var ch of line) {
+      var c = ch.codePointAt(0), n = c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;   // UTF-8 bytes
+      if (used + n > 75) { out += '\r\n '; used = 1; }
+      out += ch; used += n;
+    }
+    return out;
+  }
   var calBtn = document.getElementById('addToCal');
   if (calBtn) calBtn.addEventListener('click', function (e) {
     e.preventDefault();
@@ -1805,7 +1967,7 @@ remeasure();
       'END:VEVENT',
       'END:VCALENDAR'
     ];
-    var blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    var blob = new Blob([lines.map(fold).join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'nazeem-kifriya-wedding.ics';
@@ -1828,6 +1990,7 @@ remeasure();
       navigator.clipboard.writeText(data.url).then(function () {
         var old = btn.textContent;
         btn.textContent = 'LINK COPIED';
+        if (window.announceStatus) window.announceStatus('Invitation link copied to the clipboard.');
         setTimeout(function () { btn.textContent = old; }, 2200);
       }).catch(function () { window.prompt('Copy this invitation link:', data.url); });
       return;
@@ -1844,7 +2007,7 @@ remeasure();
   if (!btn) return;
   var addr = 'CSI Lite Auditorium, 17 Balfour Road, behind CSI BAIN Matric Higher Secondary School, Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India';
   btn.addEventListener('click', function () {
-    function done(){ var old = btn.textContent; btn.textContent = 'COPIED \u2713'; setTimeout(function(){ btn.textContent = old; }, 2200); }
+    function done(){ if (window.announceStatus) window.announceStatus('Venue address copied to the clipboard.'); var old = btn.textContent; btn.textContent = 'COPIED \u2713'; setTimeout(function(){ btn.textContent = old; }, 2200); }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(addr).then(done).catch(function(){ window.prompt('Copy the venue address:', addr); });
     } else {

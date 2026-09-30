@@ -331,10 +331,7 @@ section p.label--lg{font-size:20px}
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(213, 173, 103, 0.3);
   border-radius: 8px;
-  /* First shadow = a thin gold line just inside the top edge. On iPhone the top border row of these boxes has been seen to go
-     missing (a flat cut across the top, side and bottom borders fine); this line sits one pixel lower, so the top edge still
-     reads even if that first row is lost. Where the border does draw, the two just look like a soft glass highlight. */
-  box-shadow: inset 0 1px 0 rgba(213,173,103,0.24), inset 0 0 12px rgba(213,173,103,0.06);
+  box-shadow: inset 0 0 12px rgba(213,173,103,0.06);
   transition: transform 0.35s var(--ease-fluid), border-color 0.35s ease;
 }
 .tbox:hover {
@@ -1985,7 +1982,7 @@ guard('scratch card', function(){
       'UID:nazeem-kifriya-wedding-20261226@invite',
       'DTSTAMP:' + stamp,
       'DTSTART:20261226T053000Z',
-      'DTEND:20261226T103000Z',
+      'DTEND:20261226T073000Z',
       'SUMMARY:Nazeem & Kifriya \u2014 Wedding (Nikkah)',
       'LOCATION:CSI Lite Auditorium\\, 17 Balfour Road\\, Kellys\\, Kilpauk\\, Chennai\\, Tamil Nadu 600010\\, India',
       'DESCRIPTION:Welcome 11:00 AM \u00b7 Nikkah 11:30 AM \u00b7 Valima 12:00 PM (IST)',

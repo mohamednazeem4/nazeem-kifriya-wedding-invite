@@ -796,7 +796,7 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
     </div>
     <div class="cal-row">
       <button class="btn-gold-outline" id="addToCal" type="button">ADD TO CALENDAR</button>
-      <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T073000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Valima%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
+      <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T103000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Valima%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
     </div>
   </div>
   <div class="scrollhint scrollhint--light">THE SCENE IS SET…
@@ -1956,7 +1956,7 @@ guard('scratch card', function(){
     setTimeout(function () { if (el.textContent === msg) el.textContent = ''; }, 4000);
   };
 
-  // Build a real calendar file on the fly: 26 Dec 2026, 11:00 AM–1:00 PM IST (05:30–07:30 UTC).
+  // Build a real calendar file on the fly: 26 Dec 2026, 11:00 AM–4:00 PM IST (05:30–10:30 UTC).
   // Calendar files must not have lines longer than 75 bytes: longer ones are folded (CRLF + one space continues the line).
   function fold(line){
     var out = '', used = 0;

@@ -352,7 +352,7 @@ section p.label--lg{font-size:20px}
   position:relative;
   z-index:1;
   display:grid;
-  grid-template-columns:1fr 62px 1fr;
+  grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);
   column-gap:14px;
   align-items:center;
   min-height:96px;
@@ -399,16 +399,20 @@ section p.label--lg{font-size:20px}
   .t-mark{transition:none}
   .t-mark .bloom,.t-mark .leaf,.t-mark .gem,.t-mark .steam{animation:none}
 }
-.t-copy{text-align:left}
+.t-copy{text-align:left;margin-left:-6px} /* a little closer to the icon */
 .t-title{font-family:"Cormorant Garamond", serif;font-weight:700;font-size:22px;color:var(--text-soft);line-height:1.2}
-.t-sub{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;font-weight:500;line-height:1.35}
+.t-sub{font-size:min(10.5px,2.3vw);letter-spacing:.13em;white-space:nowrap;text-transform:uppercase;color:var(--gold-deep);margin-top:4px;font-weight:500;line-height:1.35}
 @media(max-width:400px){
-  .t-row{column-gap:9px}
+  .t-row{column-gap:9px;grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr)}
+  .t-copy{margin-left:0}
   .t-mark{width:52px;height:52px}
   .t-mark svg{width:32px;height:32px}
   .t-time{font-size:15px}
   .t-title{font-size:19px}
-  .t-sub{font-size:9px;letter-spacing:1.1px}
+}
+@media(max-width:430px){
+  .schedule-inner{padding-left:20px;padding-right:20px} /* a little more width for the timeline on phones */
+  .t-sub{letter-spacing:.1em}
 }
 
 /* ================= VENUE ================= */
@@ -1594,6 +1598,40 @@ guard('closing names', function fitClosingNames(){
     if (!natural || !room) return;
     const size = Math.min(MAX, Math.max(MIN, (room / natural) * REF * 0.98));
     h2.style.fontSize = size.toFixed(2) + 'px';
+  }
+  function schedule(){ if (!queued){ queued = true; requestAnimationFrame(fit); } }
+
+  fit();
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', schedule);
+  if (document.fonts){
+    if (document.fonts.ready) document.fonts.ready.then(schedule);
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule);
+  }
+});
+
+// ---------- SCHEDULE SUB-LINES: each stays on ONE line at every screen size ----------
+// The three lines ("Gather & Greet", "A Blessed Union", "Feast & Celebrate") never wrap. They are measured at a large
+// reference size, and one common font size is chosen so the widest fits its column (10.5px where there is room,
+// smaller on narrow phones). The same size is used for all three so they match.
+guard('schedule sub-lines', function fitScheduleSubs(){
+  const subs = Array.prototype.slice.call(document.querySelectorAll('.t-sub'));
+  if (!subs.length) return;
+
+  const MAX = 10.5, MIN = 6.5, REF = 100;
+  let queued = false;
+
+  function fit(){
+    queued = false;
+    subs.forEach(function(el){ el.style.fontSize = REF + 'px'; });
+    let size = MAX;
+    subs.forEach(function(el){
+      const room = el.parentElement.clientWidth;      // the text column (.t-copy)
+      const natural = el.scrollWidth;                  // width of the line at the reference size
+      if (room > 0 && natural > 0) size = Math.min(size, (room / natural) * REF * 0.97);
+    });
+    size = Math.max(MIN, size).toFixed(2) + 'px';
+    subs.forEach(function(el){ el.style.fontSize = size; });
   }
   function schedule(){ if (!queued){ queued = true; requestAnimationFrame(fit); } }
 

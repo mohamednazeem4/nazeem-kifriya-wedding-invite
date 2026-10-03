@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
 <meta name="theme-color" content="#1c1115">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Together with our families, we invite you to celebrate the wedding of Mohamed Nazeem &amp; Kifriya Muqsin.">
@@ -64,8 +65,8 @@ img{max-width:100%}
 #globalAmbientCanvas {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;      /* not 100vw / 100vh: on phones 100vh is taller than the visible screen while the browser bar shows */
+  height: 100%;
   pointer-events: none;
   z-index: 8999;
   mix-blend-mode: normal;
@@ -223,7 +224,7 @@ img{max-width:100%}
 html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the entrance can't scroll; removed when it opens */
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
-.entrance-video,.entrance-poster{grid-area:1/1;width:auto;height:auto;max-width:100vw;max-height:100svh;object-fit:contain;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
+.entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
 /* Poster overlay: sits on top of the <video> and stays until real video frames are on screen, so the tap never shows a black gap. */
 .entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:transform 1.15s cubic-bezier(.16,.8,.2,1),opacity .35s ease}
 .entrance.video-live .entrance-poster{opacity:0}
@@ -579,7 +580,7 @@ section { overflow-x: clip; }
 @media (max-width: 600px) {
   html, body { width: 100%; max-width: 100%; }
   video, iframe, canvas, img { max-width: 100%; }
-  .glass-card, .glass-card-light { max-width: calc(100vw - 28px); }
+  .glass-card, .glass-card-light { max-width: 100%; }
 }
 
 /* ================= SAFE AREAS (notched phones in landscape; viewport-fit=cover) ================= */
@@ -933,8 +934,10 @@ try { (function initGlobalAmbient() {
   let width, height;
 
   function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
+    // Draw at exactly the size the canvas is shown at, so nothing is ever stretched.
+    const r = canvas.getBoundingClientRect();
+    width = Math.round(r.width) || window.innerWidth;
+    height = Math.round(r.height) || window.innerHeight;
     fitCanvas(canvas, ctx, width, height);
   }
   window.addEventListener('resize', resize);
@@ -2061,7 +2064,7 @@ guard('scratch card', function(){
   if (shareBtn) shareBtn.addEventListener('click', function () {
     var data = {
       title: 'Nazeem & Kifriya \u2014 Wedding Invitation',
-      text: 'Together with our families, we invite you to celebrate the wedding of Mohamed Nazeem & Kifriya Muqsin \u2014 26 December 2026.',
+      text: 'Together with our families, we invite you to celebrate the wedding of Mohamed Nazeem & Kifriya Muqsin.',
       url: 'https://mohamednazeem4.github.io/nazeem-kifriya-wedding-invite/'
     };
     if (navigator.share) { navigator.share(data).catch(function () {}); return; }

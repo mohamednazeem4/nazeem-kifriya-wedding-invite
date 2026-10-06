@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//NazeemKifriya//Wedding Invite//EN
+BEGIN:VEVENT
+UID:nazeem-kifriya-wedding-20261226@invite
+DTSTAMP:20261005T000000Z
+DTSTART:20261226T053000Z
+DTEND:20261226T103000Z
+SUMMARY:Nazeem & Kifriya — Wedding (Nikkah)
+LOCATION:CSI Lite Auditorium\, 17 Balfour Road\, Kellys\, Kilpauk\, Chennai
+ \, Tamil Nadu 600010\, India
+DESCRIPTION:Welcome 11:00 AM · Nikkah 11:30 AM · Walima 12:00 PM (IST)
+END:VEVENT
+END:VCALENDAR

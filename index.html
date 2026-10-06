@@ -588,7 +588,20 @@ section { overflow-x: clip; }
 /* ================= SHORT / NARROW / VERY WIDE SCREENS ================= */
 /* Phones turned sideways: less top/bottom spacing so the opening screen fits without scrolling (the names are also capped by height above) */
 @media (max-height:500px) and (orientation:landscape){
-  .opening{padding-top:56px;padding-bottom:6vh}
+  .opening{padding-top:48px;padding-bottom:40px}            /* top: clear of the nav bar; bottom: room for the scroll prompt */
+  .opening .content{padding:0 24px}
+  .bismillah{font-size:clamp(14px,5.5vh,22px);line-height:1.4;margin-bottom:6px}
+  .monogram{font-size:clamp(14px,5vh,20px);letter-spacing:5px}
+  h1{font-size:clamp(24px,min(10.5vw,12.5vh),96px);margin:10px 0}   /* sized by screen HEIGHT here, so everything fits */
+  .opening .scrollhint{bottom:10px;font-size:11px;letter-spacing:2.5px}
+  .opening .scroll-arrow{display:none}                       /* the arrow alone is 50px tall: no room for it sideways */
+}
+/* Very narrow phones (about 340px or less): "COUNTING DOWN TO FOREVER" is wider than the screen, so it breaks into two lines
+   ("COUNTING DOWN / TO FOREVER") instead of ending in an ellipsis. */
+.br-narrow{display:none}
+@media (max-width:340px){
+  .countdown h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
+  .br-narrow{display:inline}
 }
 /* Foldable cover screens (about 300px or less): the schedule sub-lines cannot fit on one line at a readable size, so they may wrap */
 @media (max-width:300px){
@@ -738,7 +751,7 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
   <canvas aria-hidden="true" id="countdownBokehCanvas" class="parallax-bg" data-speed="0.25"></canvas>
   <div class="reveal">
     <div class="kicker kicker--gold kicker--m" id="cdKicker">THE BIG DAY IS COMING</div>
-    <h2 id="cdTitle">COUNTING DOWN TO FOREVER</h2>
+    <h2 id="cdTitle">COUNTING DOWN<br class="br-narrow"> TO FOREVER</h2>
     <div class="timer" aria-hidden="true">
       <div class="tbox"><span class="tnum" id="d">--</span><span class="tlabel">DAYS</span></div>
       <div class="tbox"><span class="tnum" id="h">--</span><span class="tlabel">HOURS</span></div>

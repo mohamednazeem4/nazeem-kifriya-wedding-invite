@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
 <meta name="theme-color" content="#1c1115">
+<meta name="color-scheme" content="only light">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Together with our families, we invite you to celebrate the wedding of Mohamed Nazeem &amp; Kifriya Muqsin.">
 
@@ -54,7 +55,7 @@
   --text-lead:#745a61; /* --text-soft darkened a touch for the cream-deep section (4.46:1 -> 4.8:1) */
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%} /* stops iPhones inflating text when turned sideways */
 body{margin:0;background:var(--dark);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:300;position:relative;overflow-x:hidden}
 section{position:relative}
 section[id]{scroll-margin-top:84px} /* anchored sections stop below the fixed quick-nav */
@@ -251,7 +252,7 @@ html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the e
 }
 
 /* ================= HERO ================= */
-.opening{min-height:100svh;display:grid;place-items:center;text-align:center;padding-bottom:13vh;padding-top:60px;background:
+.opening{min-height:100vh;min-height:100svh;display:grid;place-items:center;text-align:center;padding-bottom:13vh;padding-top:60px;background:
 radial-gradient(circle at 50% 38%,rgba(213,173,103,.18),transparent 30%),
 linear-gradient(145deg,#1b0e13,#4a202b 55%,#160b0f);position:relative}
 #heroBokehCanvas, #countdownBokehCanvas, #venueBokehCanvas, #duaBokehCanvas,
@@ -260,7 +261,7 @@ linear-gradient(145deg,#1b0e13,#4a202b 55%,#160b0f);position:relative}
 .opening .content{padding:clamp(24px,6vw,40px) 24px;max-width:820px;margin:0 auto}
 .bismillah{font-family:'Cormorant Garamond','Scheherazade New',serif;font-size:clamp(22px,4.6vw,30px);color:var(--gold-soft);letter-spacing:.01em;line-height:1.6;opacity:0;margin-bottom:16px}
 .monogram{font-family:"Cormorant Garamond", serif;font-size:clamp(22px,4.5vw,30px);letter-spacing:8px;color:var(--gold);opacity:0}
-h1{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(30px,10.5vw,96px);line-height:.86;margin:22px 0;color:#fff0e7;opacity:0}
+h1{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(30px,min(10.5vw,16vh),96px);line-height:.86;margin:22px 0;color:#fff0e7;opacity:0}
 /* Hero text fades in only once the invitation is opening (body.opened), timed to overlap the overlay's dissolve
    so the video's final frame melts straight into the hero with no empty pause. */
 @keyframes heroIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -283,7 +284,7 @@ h1 .amp{display:block;font-size:.5em;color:var(--gold);line-height:1.4;margin:.1
 .scrollhint .ico{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.15em;margin-left:.45em;color:var(--rose)}
 
 /* ================= WELCOME ================= */
-.intro{background:var(--cream);color:var(--text);display:grid;place-items:center;text-align:center;padding:110px 24px 90px;min-height:70svh;position:relative}
+.intro{background:var(--cream);color:var(--text);display:grid;place-items:center;text-align:center;padding:110px 24px 90px;min-height:70vh;min-height:70svh;position:relative}
 .intro-inner{max-width:640px;padding:36px 28px}
 .intro h2,.venue h2,.closing h2,.schedule h2,.reveal-section h2{font-family:"Cormorant Garamond", serif;font-weight:400;font-size:clamp(38px,6.5vw,58px);margin:14px 0;color:var(--rose)}
 .intro p,.closing p{font-family:"Cormorant Garamond", serif;font-size:24px;line-height:1.65}
@@ -293,8 +294,9 @@ section p.label--tight{letter-spacing:2px}
 section p.label--lg{font-size:20px}
 
 /* ================= SCRATCH-TO-REVEAL DATE ================= */
-.reveal-section{background:var(--cream-deep);color:var(--text);display:grid;place-items:center;text-align:center;padding:110px 20px 90px;min-height:80svh;position:relative}
+.reveal-section{background:var(--cream-deep);color:var(--text);display:grid;place-items:center;text-align:center;padding:110px 20px 90px;min-height:80vh;min-height:80svh;position:relative}
 .scratch-stage{position:relative;width:min(74%,220px);aspect-ratio:1/1;margin:38px auto 14px}
+@supports not (aspect-ratio:1/1){.scratch-stage{width:220px;height:220px}} /* old iOS: give the heart a fixed square */
 .heart-card{position:absolute;inset:0;width:100%;height:100%;display:block;filter:drop-shadow(0 6px 14px rgba(75,32,45,.18));transition:transform 0.4s var(--ease-fluid)}
 .scratch-stage:hover .heart-card { transform: scale(1.02); }
 .heart-mask{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 94C25 76 6 54 6 33 6 17 18 6 32 6c8 0 15 4 18 11 3-7 10-11 18-11 14 0 26 11 26 27 0 21-19 43-44 61z'/%3E%3C/svg%3E");-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
@@ -310,7 +312,7 @@ section p.label--lg{font-size:20px}
 #scratchEffectCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:8500} /* above the page, below the nav (9000) */
 
 /* ================= COUNTDOWN ================= */
-.countdown{background:linear-gradient(135deg,#2a1219,#542431);text-align:center;padding:110px 20px 90px;display:flex;flex-direction:column;justify-content:center;min-height:60svh;position:relative}
+.countdown{background:linear-gradient(135deg,#2a1219,#542431);text-align:center;padding:110px 20px 90px;display:flex;flex-direction:column;justify-content:center;min-height:60vh;min-height:60svh;position:relative}
 .countdown h2{
   font-family:"Cormorant Garamond", serif;
   font-weight:300;
@@ -443,7 +445,7 @@ section p.label--lg{font-size:20px}
 .location-note{line-height:1.8;opacity:.8;font-size:14px}
 
 /* ================= DUA ================= */
-.dua{background:radial-gradient(circle at 50% 25%,rgba(213,173,103,.2),transparent 55%),linear-gradient(160deg,#1b0e13,#3a1720 60%,#160b0f);color:var(--ink);display:grid;place-items:center;text-align:center;padding:110px 24px 90px;min-height:82svh;position:relative;grid-template-columns:minmax(0,1fr)}
+.dua{background:radial-gradient(circle at 50% 25%,rgba(213,173,103,.2),transparent 55%),linear-gradient(160deg,#1b0e13,#3a1720 60%,#160b0f);color:var(--ink);display:grid;place-items:center;text-align:center;padding:110px 24px 90px;min-height:82vh;min-height:82svh;position:relative;grid-template-columns:minmax(0,1fr)}
 .dua-inner{max-width:680px;width:100%;padding:48px 32px}
 .dua h2{
   font-family:"Cormorant Garamond", serif;
@@ -583,6 +585,20 @@ section { overflow-x: clip; }
   .glass-card, .glass-card-light { max-width: 100%; }
 }
 
+/* ================= SHORT / NARROW / VERY WIDE SCREENS ================= */
+/* Phones turned sideways: less top/bottom spacing so the opening screen fits without scrolling (the names are also capped by height above) */
+@media (max-height:500px) and (orientation:landscape){
+  .opening{padding-top:56px;padding-bottom:6vh}
+}
+/* Foldable cover screens (about 300px or less): the schedule sub-lines cannot fit on one line at a readable size, so they may wrap */
+@media (max-width:300px){
+  .t-sub{white-space:normal;font-size:8px}
+}
+/* Monitors much wider than the video (about 2.5:1 or wider): show the whole picture instead of cropping the top and bottom */
+@media (min-aspect-ratio:5/2){
+  .entrance-video,.entrance-poster{object-fit:contain}
+}
+
 /* ================= SAFE AREAS (notched phones in landscape; viewport-fit=cover) ================= */
 /* Each rule keeps the normal side padding and only grows it where the notch / rounded corner needs more.
    Backgrounds still run edge to edge. Browsers without env()/max() skip these lines and keep the original padding. */
@@ -646,7 +662,8 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
   var v = document.getElementById('entranceVideo');
   var p = document.getElementById('entrancePoster');
   if (!v || !window.matchMedia) return;
-  var mq = window.matchMedia('(max-width: 650px)');
+  // Tall or square screens (phones, portrait iPads, unfolded foldables) get the portrait video; wide ones get the landscape video.
+  var mq = window.matchMedia('(max-aspect-ratio: 1/1)');
   var current = '';
   var began = false;
   v.addEventListener('play', function () { began = true; });
@@ -813,7 +830,7 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
       </div>
     </div>
     <div class="cal-row">
-      <button class="btn-gold-outline" id="addToCal" type="button">ADD TO CALENDAR</button>
+      <a class="btn-gold-outline" id="addToCal" href="assets/nazeem-kifriya-wedding.ics">ADD TO CALENDAR</a>
       <a class="btn-gold-outline" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nazeem%20%26%20Kifriya%20%E2%80%94%20Wedding%20(Nikkah)&amp;dates=20261226T053000Z/20261226T103000Z&amp;details=Welcome%2011%3A00%20AM%20%C2%B7%20Nikkah%2011%3A30%20AM%20%C2%B7%20Walima%2012%3A00%20PM%20(IST)&amp;location=CSI%20Lite%20Auditorium%2C%2017%20Balfour%20Road%2C%20behind%20CSI%20BAIN%20Matric%20Higher%20Secondary%20School%2C%20Kellys%2C%20Kilpauk%2C%20Chennai%2C%20Tamil%20Nadu%20600010%2C%20India" target="_blank" rel="noopener">GOOGLE CALENDAR</a>
     </div>
   </div>
@@ -1254,9 +1271,18 @@ const entrance = document.getElementById("entrance");
 function pageShell(){
   return Array.prototype.slice.call(document.querySelectorAll('#quickNav, main, footer, #progressDots'));
 }
+var focusTrapOn = false;
+function trapFocus(e){
+  if (document.documentElement.classList.contains('entrance-lock') && !entrance.contains(e.target)) envelope.focus();
+}
 function lockPage(){
   pageShell().forEach(function(el){ el.setAttribute('inert', ''); });
   document.documentElement.classList.add('entrance-lock');
+  // Browsers without `inert` (iOS before 15.5, older Chrome / Firefox): if keyboard focus escapes to the page, pull it back.
+  if (typeof HTMLElement !== 'undefined' && !('inert' in HTMLElement.prototype) && !focusTrapOn){
+    document.addEventListener('focusin', trapFocus);
+    focusTrapOn = true;
+  }
 }
 function unlockPage(){
   pageShell().forEach(function(el){ el.removeAttribute('inert'); });
@@ -1639,6 +1665,8 @@ guard('schedule sub-lines', function fitScheduleSubs(){
 
   function fit(){
     queued = false;
+    // Under ~300px nothing fits on one line at a readable size: let the CSS (wrapping, 8px) take over.
+    if (window.innerWidth <= 300){ subs.forEach(function(el){ el.style.fontSize = ''; }); return; }
     subs.forEach(function(el){ el.style.fontSize = REF + 'px'; });
     let size = MAX;
     subs.forEach(function(el){
@@ -2017,47 +2045,8 @@ guard('scratch card', function(){
     setTimeout(function () { if (el.textContent === msg) el.textContent = ''; }, 4000);
   };
 
-  // Build a real calendar file on the fly: 26 Dec 2026, 11:00 AM–4:00 PM IST (05:30–10:30 UTC).
-  // Calendar files must not have lines longer than 75 bytes: longer ones are folded (CRLF + one space continues the line).
-  function fold(line){
-    var out = '', used = 0;
-    for (var ch of line) {
-      var c = ch.codePointAt(0), n = c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;   // UTF-8 bytes
-      if (used + n > 75) { out += '\r\n '; used = 1; }
-      out += ch; used += n;
-    }
-    return out;
-  }
-  var calBtn = document.getElementById('addToCal');
-  if (calBtn) calBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    function f(n){ return String(n).padStart(2, '0'); }
-    var now = new Date();
-    var stamp = now.getUTCFullYear() + f(now.getUTCMonth() + 1) + f(now.getUTCDate()) +
-                'T' + f(now.getUTCHours()) + f(now.getUTCMinutes()) + f(now.getUTCSeconds()) + 'Z';
-    var lines = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//NazeemKifriya//Wedding Invite//EN',
-      'BEGIN:VEVENT',
-      'UID:nazeem-kifriya-wedding-20261226@invite',
-      'DTSTAMP:' + stamp,
-      'DTSTART:20261226T053000Z',
-      'DTEND:20261226T103000Z',
-      'SUMMARY:Nazeem & Kifriya \u2014 Wedding (Nikkah)',
-      'LOCATION:CSI Lite Auditorium\\, 17 Balfour Road\\, Kellys\\, Kilpauk\\, Chennai\\, Tamil Nadu 600010\\, India',
-      'DESCRIPTION:Welcome 11:00 AM \u00b7 Nikkah 11:30 AM \u00b7 Walima 12:00 PM (IST)',
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ];
-    var blob = new Blob([lines.map(fold).join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'nazeem-kifriya-wedding.ics';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
-  });
+  // Add to Calendar is a plain link to assets/nazeem-kifriya-wedding.ics (11:00 AM-4:00 PM IST, 26 Dec 2026).
+  // A real file works in more places (iPhones open it straight in Calendar; in-app browsers handle links better than generated downloads).
 
   // Native share sheet on mobile, clipboard fallback on desktop.
   var shareBtn = document.getElementById('shareInvite');

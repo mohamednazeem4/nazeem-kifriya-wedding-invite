@@ -588,13 +588,13 @@ section { overflow-x: clip; }
 /* ================= SHORT / NARROW / VERY WIDE SCREENS ================= */
 /* Phones turned sideways: less top/bottom spacing so the opening screen fits without scrolling (the names are also capped by height above) */
 @media (max-height:500px) and (orientation:landscape){
-  .opening{padding-top:48px;padding-bottom:40px}            /* top: clear of the nav bar; bottom: room for the scroll prompt */
+  .opening{padding-top:54px;padding-bottom:56px}            /* top: clear of the 47px nav bar; bottom: room for the scroll prompt and its small arrow */
   .opening .content{padding:0 24px}
-  .bismillah{font-size:clamp(14px,5.5vh,22px);line-height:1.4;margin-bottom:6px}
-  .monogram{font-size:clamp(14px,5vh,20px);letter-spacing:5px}
-  h1{font-size:clamp(24px,min(10.5vw,12.5vh),96px);margin:10px 0}   /* sized by screen HEIGHT here, so everything fits */
+  .bismillah{font-size:clamp(14px,4.5vh,22px);line-height:1.4;margin-bottom:4px}
+  .monogram{font-size:clamp(14px,4vh,20px);letter-spacing:5px}
+  h1{font-size:clamp(24px,min(10.5vw,11vh),96px);margin:8px 0}   /* sized by screen HEIGHT here, so everything fits */
   .opening .scrollhint{bottom:10px;font-size:11px;letter-spacing:2.5px}
-  .opening .scroll-arrow{display:none}                       /* the arrow alone is 50px tall: no room for it sideways */
+  .opening .scroll-arrow{width:12px;height:20px;margin:4px auto 0}   /* smaller arrow instead of none */
 }
 /* Very narrow phones (about 340px or less): "COUNTING DOWN TO FOREVER" is wider than the screen, so it breaks into two lines
    ("COUNTING DOWN / TO FOREVER") instead of ending in an ellipsis. */

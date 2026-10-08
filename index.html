@@ -590,7 +590,7 @@ section { overflow-x: clip; }
 @media (max-height:500px) and (orientation:landscape){
   .opening{padding-top:54px;padding-bottom:56px}            /* top: clear of the 47px nav bar; bottom: room for the scroll prompt and its small arrow */
   .opening .content{padding:0 24px}
-  .bismillah{font-size:clamp(14px,4.5vh,22px);line-height:1.4;margin-bottom:4px}
+  .bismillah{font-size:clamp(14px,4.5vh,22px);line-height:1.4;margin-bottom:4px;position:relative;top:-12px}   /* nudged up: more space above the N · K, and still clear of the nav bar */
   .monogram{font-size:clamp(14px,4vh,20px);letter-spacing:5px}
   h1{font-size:clamp(24px,min(10.5vw,11vh),96px);margin:8px 0}   /* sized by screen HEIGHT here, so everything fits */
   .opening .scrollhint{bottom:10px;font-size:11px;letter-spacing:2.5px}
@@ -679,11 +679,13 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
   var mq = window.matchMedia('(max-aspect-ratio: 1/1)');
   var current = '';
   var began = false;
+  var swapping = false;
   v.addEventListener('play', function () { began = true; });
+
   function pick() {
-    if (current && (began || !v.paused || v.ended)) return;                 // already started: leave it alone
     var kind = mq.matches ? 'mobile' : 'desktop';
     if (kind === current) return;
+    if (current && (began || !v.paused || v.ended)) { swapWhilePlaying(kind); return; }   // already started: switch mid-playback
     current = kind;
     var posterUrl = v.getAttribute('data-poster-' + kind);
     v.poster = posterUrl;
@@ -691,6 +693,47 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
     // "#t=0.001" makes phones (iOS Safari especially) fetch + decode the FIRST frame up front, so the tap doesn't start from a cold decoder.
     v.src = v.getAttribute('data-src-' + kind) + '#t=0.001';
   }
+
+  // The phone was rotated AFTER the video started: switch to the video that suits the new shape and carry on from the
+  // same point (by proportion: both videos tell the same story, 7s and 8s long), instead of showing a heavily cropped one.
+  function swapWhilePlaying(kind) {
+    if (swapping || v.ended) return;                    // one switch at a time; a further rotation is picked up afterwards
+    var dur = v.duration, t = v.currentTime;
+    if (!isFinite(dur) || dur - t < 1) return;          // nearly finished: not worth switching
+    var frac = t / dur;
+    var wasPlaying = !v.paused;
+    swapping = true;
+    current = kind;
+    try {                                               // keep the current picture on screen while the other file loads
+      var c = document.createElement('canvas');
+      c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      v.poster = c.toDataURL('image/jpeg', 0.8);
+    } catch (e) {}
+    var gaveUp = false;
+    var timer = setTimeout(function () {                // the new file never arrived: don't leave the guest stuck on the envelope
+      gaveUp = true; done();
+      if (typeof openInvitation === 'function') openInvitation();
+    }, 7000);
+    function onMeta() {
+      v.removeEventListener('loadedmetadata', onMeta);
+      try { v.currentTime = frac * v.duration; } catch (e) {}
+      if (wasPlaying) {
+        var pr = v.play();
+        if (pr && pr.catch) pr.catch(function () { if (typeof openInvitation === 'function') openInvitation(); });
+      }
+      done();
+    }
+    function done() {
+      clearTimeout(timer);
+      v.removeEventListener('loadedmetadata', onMeta);
+      swapping = false;
+      if (!gaveUp) pick();                              // rotated again meanwhile? switch again
+    }
+    v.addEventListener('loadedmetadata', onMeta);
+    v.src = v.getAttribute('data-src-' + kind);         // no "#t=" here: we seek to the right moment ourselves
+  }
+
   pick();
   if (mq.addEventListener) mq.addEventListener('change', pick);
   else if (mq.addListener) mq.addListener(pick);                          // older Safari

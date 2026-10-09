@@ -182,6 +182,8 @@ img{max-width:100%}
 /* Ghost gold button for dark sections (venue: copy address) */
 .btn-ghost-gold{display:inline-block;margin-top:18px;margin-left:10px;padding:13px 24px;border:1px solid rgba(213,173,103,.55);color:var(--gold);background:transparent;border-radius:30px;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),background .35s ease,border-color .35s ease}
 .btn-ghost-gold:hover,.btn-ghost-gold:focus{background:rgba(213,173,103,.14);border-color:var(--gold);transform:translateY(-3px)}
+/* Shown only if the phone refuses to copy for us: the address in a box that is already selected, so a long-press copies it. */
+.addr-box{display:block;width:100%;max-width:420px;margin:14px 0 0;padding:12px 14px;border:1px solid rgba(213,173,103,.55);border-radius:12px;background:rgba(255,255,255,.06);color:#fff0e7;font-family:Montserrat,sans-serif;font-size:16px;line-height:1.4;text-align:center;box-sizing:border-box}
 
 /* ================= GLASSMORPHISM CARD OVERLAYS ================= */
 .glass-card {
@@ -607,6 +609,21 @@ section { overflow-x: clip; }
 @media (max-width:300px){
   .t-sub{white-space:normal;font-size:8px}
 }
+/* Phones turned sideways: show the WHOLE landscape video instead of zooming into it. The video keeps its 16:9 shape, centred
+   (full height); its left and right edges fade into the dark background, so the empty sides do not look like bars. */
+@media (max-height:500px) and (orientation:landscape){
+  .entrance-video,.entrance-poster{
+    width:auto;height:100%;max-width:100%;aspect-ratio:16/9;object-fit:cover;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%);
+            mask-image:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%);
+  }
+}
+/* The phone was turned AFTER the video started: keep the same video, but show all of it (no zoom, nothing cropped), centred. */
+.entrance.shape-mismatch .entrance-video,
+.entrance.shape-mismatch .entrance-poster{
+  width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:contain;
+  -webkit-mask-image:none;mask-image:none;
+}
 /* Monitors much wider than the video (about 2.5:1 or wider): show the whole picture instead of cropping the top and bottom */
 @media (min-aspect-ratio:5/2){
   .entrance-video,.entrance-poster{object-fit:contain}
@@ -674,18 +691,27 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
 (function () {
   var v = document.getElementById('entranceVideo');
   var p = document.getElementById('entrancePoster');
+  var entrance = document.getElementById('entrance');
   if (!v || !window.matchMedia) return;
   // Tall or square screens (phones, portrait iPads, unfolded foldables) get the portrait video; wide ones get the landscape video.
   var mq = window.matchMedia('(max-aspect-ratio: 1/1)');
   var current = '';
   var began = false;
   var swapping = false;
+  var objectUrl = '';
   v.addEventListener('play', function () { began = true; });
+
+  function wholeVideoMode(on) { if (entrance) entrance.classList.toggle('shape-mismatch', on); }
+  function openNow() { if (typeof openInvitation === 'function') openInvitation(); }
 
   function pick() {
     var kind = mq.matches ? 'mobile' : 'desktop';
+    if (current && (began || !v.paused || v.ended)) {          // the video has already started
+      if (kind === current) { wholeVideoMode(false); return; } // turned back: back to the normal full-screen look
+      swapWhilePlaying(kind);
+      return;
+    }
     if (kind === current) return;
-    if (current && (began || !v.paused || v.ended)) { swapWhilePlaying(kind); return; }   // already started: switch mid-playback
     current = kind;
     var posterUrl = v.getAttribute('data-poster-' + kind);
     v.poster = posterUrl;
@@ -694,44 +720,66 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
     v.src = v.getAttribute('data-src-' + kind) + '#t=0.001';
   }
 
-  // The phone was rotated AFTER the video started: switch to the video that suits the new shape and carry on from the
-  // same point (by proportion: both videos tell the same story, 7s and 8s long), instead of showing a heavily cropped one.
+  // The phone was turned AFTER the video started. The video that is playing keeps playing (shown whole, not zoomed) while the
+  // other file downloads in the background. When it has arrived we switch to it and carry on from the same point (by
+  // proportion: both videos tell the same story). Nothing freezes while we wait, and if anything goes wrong the first video
+  // simply plays on until its end, as it always did.
   function swapWhilePlaying(kind) {
-    if (swapping || v.ended) return;                    // one switch at a time; a further rotation is picked up afterwards
-    var dur = v.duration, t = v.currentTime;
-    if (!isFinite(dur) || dur - t < 1) return;          // nearly finished: not worth switching
-    var frac = t / dur;
-    var wasPlaying = !v.paused;
+    wholeVideoMode(true);                                       // meanwhile: show all of the playing video, no zoom
+    if (swapping || v.ended || !window.fetch || !window.URL || !URL.createObjectURL) return;
+    var dur = v.duration;
+    if (!isFinite(dur) || dur - v.currentTime < 2.5) return;    // too close to the end for a download to be worth it
     swapping = true;
-    current = kind;
-    try {                                               // keep the current picture on screen while the other file loads
-      var c = document.createElement('canvas');
-      c.width = v.videoWidth; c.height = v.videoHeight;
-      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
-      v.poster = c.toDataURL('image/jpeg', 0.8);
-    } catch (e) {}
-    var gaveUp = false;
-    var timer = setTimeout(function () {                // the new file never arrived: don't leave the guest stuck on the envelope
-      gaveUp = true; done();
-      if (typeof openInvitation === 'function') openInvitation();
-    }, 7000);
+    fetch(v.getAttribute('data-src-' + kind))
+      .then(function (r) { if (!r.ok) throw new Error('video download failed'); return r.blob(); })
+      .then(function (blob) {
+        var wanted = mq.matches ? 'mobile' : 'desktop';
+        var closing = entrance && entrance.classList.contains('entering');
+        if (wanted !== kind || v.ended || closing || v.duration - v.currentTime < 1) {   // no longer wanted / too late
+          swapping = false;
+          wholeVideoMode(wanted !== current);
+          return;
+        }
+        switchTo(kind, new Blob([blob], { type: 'video/mp4' }));
+      })
+      .catch(function () { swapping = false; });                // download failed: the playing video simply continues
+  }
+
+  function switchTo(kind, blob) {
+    var frac = v.currentTime / v.duration;                      // how far through the story we are
+    var oldUrl = objectUrl;
+    objectUrl = URL.createObjectURL(blob);
+    var guard = setTimeout(function () { finish(); openNow(); }, 5000);   // never leave the guest stuck on a blank screen
+    v.style.transition = 'none';                                // hide the changeover (no slow fade)
+    v.style.opacity = '0';
+    function finish() {
+      clearTimeout(guard);
+      v.removeEventListener('loadedmetadata', onMeta);
+      swapping = false;
+      v.style.transition = 'opacity .35s ease';
+      v.style.opacity = '1';
+      setTimeout(function () { v.style.transition = ''; v.style.opacity = ''; }, 450);
+      if (oldUrl) { try { URL.revokeObjectURL(oldUrl); } catch (e) {} }
+      if ((mq.matches ? 'mobile' : 'desktop') !== current) pick();       // turned again meanwhile
+    }
+    function play() {
+      var pr = v.play();
+      if (pr && pr.catch) pr.catch(function () {                // phone refused sound-on playback: carry on silently
+        v.muted = true;
+        var p2 = v.play();
+        if (p2 && p2.catch) p2.catch(function () { finish(); openNow(); });
+      });
+    }
     function onMeta() {
       v.removeEventListener('loadedmetadata', onMeta);
       try { v.currentTime = frac * v.duration; } catch (e) {}
-      if (wasPlaying) {
-        var pr = v.play();
-        if (pr && pr.catch) pr.catch(function () { if (typeof openInvitation === 'function') openInvitation(); });
-      }
-      done();
-    }
-    function done() {
-      clearTimeout(timer);
-      v.removeEventListener('loadedmetadata', onMeta);
-      swapping = false;
-      if (!gaveUp) pick();                              // rotated again meanwhile? switch again
+      v.addEventListener('playing', function shown() { v.removeEventListener('playing', shown); finish(); });
+      play();
     }
     v.addEventListener('loadedmetadata', onMeta);
-    v.src = v.getAttribute('data-src-' + kind);         // no "#t=" here: we seek to the right moment ourselves
+    current = kind;
+    wholeVideoMode(false);
+    v.src = objectUrl;
   }
 
   pick();
@@ -2134,12 +2182,63 @@ guard('scratch card', function(){
   var btn = document.getElementById('copyAddress');
   if (!btn) return;
   var addr = 'CSI Lite Auditorium, 17 Balfour Road, behind CSI BAIN Matric Higher Secondary School, Kellys, Kilpauk, Chennai, Tamil Nadu 600010, India';
+  var label = btn.textContent, timer = null, box = null;
+
+  function announce(m) { if (window.announceStatus) window.announceStatus(m); }
+  function say(text, ms) {
+    clearTimeout(timer);
+    btn.textContent = text;
+    timer = setTimeout(function () { btn.textContent = label; }, ms || 2200);
+  }
+  function ok() {
+    if (box) box.style.display = 'none';
+    announce('Venue address copied to the clipboard.');
+    say('COPIED \u2713');
+  }
+
+  // Old-fashioned copy. It runs inside the tap itself and does not need the page to have "focus", which the newer
+  // clipboard API insists on (and which the page may not have yet when you come back from Google Maps).
+  function legacyCopy() {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = addr;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px';   // 16px: stops iOS zooming in
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { ta.setSelectionRange(0, addr.length); } catch (e) {}
+      var res = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return !!res;
+    } catch (e) { return false; }
+  }
+
+  // Last resort (replaces window.prompt, which phones often block): show the address in a box that is already selected.
+  function showBox() {
+    if (!box) {
+      box = document.createElement('input');
+      box.type = 'text';
+      box.readOnly = true;
+      box.value = addr;
+      box.className = 'addr-box';
+      box.setAttribute('aria-label', 'Venue address');
+      box.addEventListener('focus', function () { box.select(); });
+      btn.parentNode.appendChild(box);
+    }
+    box.style.display = 'block';
+    try { box.focus(); box.select(); box.setSelectionRange(0, addr.length); } catch (e) {}
+    say('PRESS & HOLD TO COPY', 5000);
+    announce('The address could not be copied automatically. It is shown below: select it to copy.');
+  }
+
   btn.addEventListener('click', function () {
-    function done(){ if (window.announceStatus) window.announceStatus('Venue address copied to the clipboard.'); var old = btn.textContent; btn.textContent = 'COPIED \u2713'; setTimeout(function(){ btn.textContent = old; }, 2200); }
+    if (legacyCopy()) { ok(); return; }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(addr).then(done).catch(function(){ window.prompt('Copy the venue address:', addr); });
+      try { window.focus(); } catch (e) {}
+      navigator.clipboard.writeText(addr).then(ok, showBox);
     } else {
-      window.prompt('Copy the venue address:', addr);
+      showBox();
     }
   });
 })();

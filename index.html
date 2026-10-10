@@ -605,6 +605,10 @@ section { overflow-x: clip; }
   .countdown h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
   .br-narrow{display:inline}
 }
+/* Narrow phones and foldable cover screens: the Dua heading may wrap onto two lines instead of ending in an ellipsis */
+@media (max-width:420px){
+  .dua h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
+}
 /* Foldable cover screens (about 300px or less): the schedule sub-lines cannot fit on one line at a readable size, so they may wrap */
 @media (max-width:300px){
   .t-sub{white-space:normal;font-size:8px}
@@ -642,6 +646,20 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
   .dua{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
 }
 
+
+/* ---- TOP / BOTTOM safe areas (full-screen / Home Screen modes, notch, Dynamic Island, home indicator) ----
+   Each rule is ignored by browsers without env(), which then keep the normal spacing.
+   The hero already ends ABOVE the home indicator wherever 100svh is supported (svh excludes the browser's bottom bars), so its
+   scroll prompt only gets the bottom inset on older browsers that fall back to plain 100vh (see the @supports rule). */
+.quick-nav{padding-top:max(12px,env(safe-area-inset-top,0px))}                      /* nav bar sits below the notch / status area */
+.opening{padding-top:calc(60px + env(safe-area-inset-top,0px))}                      /* hero starts below the (taller) nav bar */
+footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}                  /* last line clears the home indicator */
+@supports not (min-height:100svh){
+  .opening .scrollhint{bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-height:500px) and (orientation:landscape){                               /* phones turned sideways (see the compact hero above) */
+  .opening{padding-top:calc(54px + env(safe-area-inset-top,0px))}
+}
 </style>
 <noscript><style>.entrance{display:none}.bismillah,.monogram,h1,.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>

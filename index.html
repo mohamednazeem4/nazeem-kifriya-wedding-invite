@@ -699,10 +699,48 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
   var began = false;
   var swapping = false;
   var objectUrl = '';
+  var blobs = {};        // videos already downloaded into memory, by kind ('mobile' / 'desktop')
+  var loading = {};      // downloads in progress
+  var canPreload = !!(window.fetch && window.Promise && window.URL && URL.createObjectURL && window.Blob);
   v.addEventListener('play', function () { began = true; });
 
+  function other(kind) { return kind === 'mobile' ? 'desktop' : 'mobile'; }
   function wholeVideoMode(on) { if (entrance) entrance.classList.toggle('shape-mismatch', on); }
+  function isClosing() { return !!(entrance && entrance.classList.contains('entering')); }
   function openNow() { if (typeof openInvitation === 'function') openInvitation(); }
+
+  // Download one of the two videos into memory (only once). Resolves with the file.
+  function getBlob(kind) {
+    if (blobs[kind]) return Promise.resolve(blobs[kind]);
+    if (loading[kind]) return loading[kind];
+    loading[kind] = fetch(v.getAttribute('data-src-' + kind))
+      .then(function (r) { if (!r.ok) throw new Error('video download failed'); return r.blob(); })
+      .then(function (b) { blobs[kind] = new Blob([b], { type: 'video/mp4' }); loading[kind] = null; return blobs[kind]; })
+      .catch(function (e) { loading[kind] = null; throw e; });
+    return loading[kind];
+  }
+
+  // Once the video that matches the screen is ready, quietly fetch the OTHER one (and its poster) in the background,
+  // so a turn of the phone - before or after the tap - never has to wait for a download. Skipped on Data Saver / very slow links.
+  function preloadOther() {
+    if (!canPreload || !current) return;
+    var c = navigator.connection;
+    if (c && (c.saveData || /2g/.test(c.effectiveType || ''))) return;
+    var o = other(current);
+    getBlob(o).catch(function () {});
+    var img = new Image();
+    img.src = v.getAttribute('data-poster-' + o);
+  }
+  function fullyBuffered() {
+    try { return v.duration > 0 && v.buffered.length > 0 && v.buffered.end(v.buffered.length - 1) >= v.duration - 0.25; }
+    catch (e) { return false; }
+  }
+  v.addEventListener('canplaythrough', preloadOther);
+  v.addEventListener('progress', function () { if (fullyBuffered()) preloadOther(); });
+  v.addEventListener('playing', function once() {              // phones that never pre-buffer (iOS): start soon after playback begins
+    v.removeEventListener('playing', once);
+    setTimeout(preloadOther, 4000);
+  });
 
   function pick() {
     var kind = mq.matches ? 'mobile' : 'desktop';
@@ -720,34 +758,30 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
     v.src = v.getAttribute('data-src-' + kind) + '#t=0.001';
   }
 
-  // The phone was turned AFTER the video started. The video that is playing keeps playing (shown whole, not zoomed) while the
-  // other file downloads in the background. When it has arrived we switch to it and carry on from the same point (by
-  // proportion: both videos tell the same story). Nothing freezes while we wait, and if anything goes wrong the first video
-  // simply plays on until its end, as it always did.
+  // The phone was turned AFTER the video started: switch to the other video and carry on from the same point (by proportion:
+  // both videos tell the same story). Normally that file is already in memory, so the switch is immediate. There is no
+  // "too close to the end" rule: it only stands down if the video has already ended or the invitation is already opening.
   function swapWhilePlaying(kind) {
-    wholeVideoMode(true);                                       // meanwhile: show all of the playing video, no zoom
-    if (swapping || v.ended || !window.fetch || !window.URL || !URL.createObjectURL) return;
-    var dur = v.duration;
-    if (!isFinite(dur) || dur - v.currentTime < 2.5) return;    // too close to the end for a download to be worth it
+    if (!canPreload) { wholeVideoMode(true); return; }           // old phone: just show the playing video whole
+    if (swapping || v.ended || isClosing()) return;
     swapping = true;
-    fetch(v.getAttribute('data-src-' + kind))
-      .then(function (r) { if (!r.ok) throw new Error('video download failed'); return r.blob(); })
+    if (!blobs[kind]) wholeVideoMode(true);                     // not downloaded yet: show the playing video whole meanwhile
+    getBlob(kind)
       .then(function (blob) {
         var wanted = mq.matches ? 'mobile' : 'desktop';
-        var closing = entrance && entrance.classList.contains('entering');
-        if (wanted !== kind || v.ended || closing || v.duration - v.currentTime < 1) {   // no longer wanted / too late
+        if (wanted !== kind || v.ended || isClosing()) {        // no longer wanted / too late
           swapping = false;
           wholeVideoMode(wanted !== current);
           return;
         }
-        switchTo(kind, new Blob([blob], { type: 'video/mp4' }));
+        switchTo(kind, blob);
       })
       .catch(function () { swapping = false; });                // download failed: the playing video simply continues
   }
 
   function switchTo(kind, blob) {
-    var frac = v.currentTime / v.duration;                      // how far through the story we are
-    var oldUrl = objectUrl;
+    var frac = v.duration > 0 ? v.currentTime / v.duration : 0;  // how far through the story we are
+    var oldUrl = objectUrl, previous = current;
     objectUrl = URL.createObjectURL(blob);
     var guard = setTimeout(function () { finish(); openNow(); }, 5000);   // never leave the guest stuck on a blank screen
     v.style.transition = 'none';                                // hide the changeover (no slow fade)
@@ -760,6 +794,7 @@ footer{padding-left:max(clamp(10px,3vw,25px),env(safe-area-inset-left,0px));padd
       v.style.opacity = '1';
       setTimeout(function () { v.style.transition = ''; v.style.opacity = ''; }, 450);
       if (oldUrl) { try { URL.revokeObjectURL(oldUrl); } catch (e) {} }
+      getBlob(previous).catch(function () {});                           // so turning back is instant too
       if ((mq.matches ? 'mobile' : 'desktop') !== current) pick();       // turned again meanwhile
     }
     function play() {

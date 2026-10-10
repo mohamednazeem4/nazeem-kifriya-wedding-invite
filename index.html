@@ -440,7 +440,7 @@ section p.label--lg{font-size:20px}
 .venue-name{font-family:"Cormorant Garamond", serif;font-size:30px;color:var(--gold);margin-bottom:20px}
 .venue-address{font-size:16px;line-height:1.8;opacity:.8}
 .location-wrap{display:grid;grid-template-columns:220px 1fr;gap:45px;align-items:center;margin-top:45px;text-align:left}
-.qr{background:#fff;padding:12px;width:220px;width:min(220px,100%);border-radius:6px;box-shadow: 0 8px 24px rgba(0,0,0,0.2);transition: transform 0.35s var(--ease-fluid);}
+.qr{background:#fff;padding:12px;width:220px;border-radius:6px;box-shadow: 0 8px 24px rgba(0,0,0,0.2);transition: transform 0.35s var(--ease-fluid);}
 .qr:hover { transform: scale(1.04); }
 .qr img{width:100%;display:block}
 .qr-label{font-size:12px;color:#4b3940;letter-spacing:2px;text-align:center;margin-top:9px;font-weight:500}
@@ -605,16 +605,6 @@ section { overflow-x: clip; }
   .countdown h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
   .br-narrow{display:inline}
 }
-/* Venue QR and card on narrow screens: the QR is never wider than the room inside the card, and the card's side padding shrinks
-   on the narrowest screens (foldable cover screens). The grid track may now shrink below the QR's old fixed 220px. */
-.location-wrap{grid-template-columns:minmax(0,220px) minmax(0,1fr)}
-@media (max-width:650px){
-  .location-wrap{grid-template-columns:minmax(0,1fr)}
-}
-@media (max-width:360px){
-  .venue-inner{padding:40px 16px}
-  .qr{padding:10px}
-}
 /* Narrow phones and foldable cover screens: the Dua heading may wrap onto two lines instead of ending in an ellipsis */
 @media (max-width:420px){
   .dua h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
@@ -669,17 +659,6 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
 }
 @media (max-height:500px) and (orientation:landscape){                               /* phones turned sideways (see the compact hero above) */
   .opening{padding-top:calc(54px + env(safe-area-inset-top,0px))}
-}
-/* Installed / full-screen mode (Home Screen app): there are no browser bars, so the home-indicator inset is constant and every scroll
-   prompt, hero included, is lifted clear of it. (In a normal browser tab the inset changes as the toolbar collapses, so lifting
-   the prompts there would make them jump while scrolling; the hero is already sized to end above the bars by 100svh.) */
-@media (display-mode: standalone), (display-mode: fullscreen){
-  .scrollhint,.opening .scrollhint{bottom:calc(22px + env(safe-area-inset-bottom,0px))}
-}
-@media (display-mode: standalone) and (max-height:500px) and (orientation:landscape),
-       (display-mode: fullscreen) and (max-height:500px) and (orientation:landscape){
-  .opening{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
-  .opening .scrollhint{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
 }
 </style>
 <noscript><style>.entrance{display:none}.bismillah,.monogram,h1,.reveal{opacity:1!important;transform:none!important}</style></noscript>
@@ -882,7 +861,7 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   <div class="intro-inner glass-card-light reveal">
     <div class="flower" aria-hidden="true"><svg class="ico"><use href="#ic-star"/></svg></div>
     <p class="label">WITH JOY IN OUR HEARTS</p>
-    <h2>Together with our families,<br>we invite you to<br>celebrate with us.</h2>
+    <h2>Together with our families, we invite you to celebrate with us.</h2>
     <p>As we begin a beautiful new chapter together, your presence would make our celebration even more meaningful.</p>
   </div>
   <div class="scrollhint scrollhint--light">THE DATE REVEAL

@@ -590,9 +590,9 @@ section { overflow-x: clip; }
 /* ================= SHORT / NARROW / VERY WIDE SCREENS ================= */
 /* Phones turned sideways: less top/bottom spacing so the opening screen fits without scrolling (the names are also capped by height above) */
 @media (max-height:500px) and (orientation:landscape){
-  .opening{padding-top:54px;padding-bottom:105px;padding-bottom:calc(105px + env(safe-area-inset-bottom,0px))}   /* top: clear of the 47px nav bar; bottom: room for the full-size scroll prompt (75px) + its gap + the home indicator */
+  .opening{padding-top:60px;padding-bottom:123px;padding-bottom:calc(123px + env(safe-area-inset-bottom,0px))}   /* top: 13px clear of the 47px nav bar; bottom: the full-size scroll prompt (75px) + its distance from the bottom + about 26px between the names and the prompt */
   .opening .content{padding:0 24px}
-  .bismillah{font-size:clamp(14px,4.5vh,22px);line-height:1.4;margin-bottom:4px;position:relative;top:-12px}   /* nudged up: more space above the N · K, and still clear of the nav bar */
+  .bismillah{font-size:clamp(14px,4.5vh,22px);line-height:1.4;margin-bottom:16px}   /* 16px gap above the N · K */
   .monogram{font-size:clamp(14px,4vh,20px);letter-spacing:5px}
   h1{font-size:clamp(24px,min(10.5vw,11vh),96px);margin:8px 0}   /* sized by screen HEIGHT here, so everything fits */
   .opening .scrollhint{bottom:22px;bottom:calc(22px + env(safe-area-inset-bottom,0px))}   /* same size as the other pages' prompts, lifted above the home indicator */
@@ -667,7 +667,7 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   .opening .scrollhint{bottom:calc(22px + env(safe-area-inset-bottom,0px))}
 }
 @media (max-height:500px) and (orientation:landscape){                               /* phones turned sideways (see the compact hero above) */
-  .opening{padding-top:calc(54px + env(safe-area-inset-top,0px))}
+  .opening{padding-top:calc(60px + env(safe-area-inset-top,0px))}
 }
 /* Installed / full-screen mode (Home Screen app): there are no browser bars, so the home-indicator inset is constant and every scroll
    prompt, hero included, is lifted clear of it. (In a normal browser tab the inset changes as the toolbar collapses, so lifting

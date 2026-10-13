@@ -263,7 +263,7 @@ linear-gradient(145deg,#1b0e13,#4a202b 55%,#160b0f);position:relative}
 .opening .content{padding:clamp(24px,6vw,40px) 24px;max-width:820px;margin:0 auto}
 .bismillah{font-family:'Cormorant Garamond','Scheherazade New',serif;font-size:clamp(22px,4.6vw,30px);color:var(--gold-soft);letter-spacing:.01em;line-height:1.6;opacity:0;margin-bottom:16px}
 .monogram{font-family:"Cormorant Garamond", serif;font-size:clamp(22px,4.5vw,30px);letter-spacing:8px;color:var(--gold);opacity:0}
-h1{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(30px,min(10.5vw,16vh),96px);line-height:.86;margin:22px 0;color:#fff0e7;opacity:0}
+h1{font-family:"Cormorant Garamond", serif;font-weight:300;font-size:clamp(20px,min(10.5vw,16vh),96px);line-height:.86;margin:22px 0;color:#fff0e7;opacity:0}
 /* Hero text fades in only once the invitation is opening (body.opened), timed to overlap the overlay's dissolve
    so the video's final frame melts straight into the hero with no empty pause. */
 @keyframes heroIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -369,7 +369,7 @@ section p.label--lg{font-size:20px}
   transform: scale(1.03);
   background: rgba(213, 173, 103, 0.08);
 }
-.t-time{font-family:"Bickham Script Pro", serif;font-size:20px;line-height:1.1;color:var(--text);text-align:right;font-weight:400;white-space:nowrap;padding-right:6px}
+.t-time{font-family:serif;font-size:20px;line-height:1.1;color:var(--text);text-align:right;font-weight:400;white-space:nowrap;padding-right:6px}
 .t-mark{
   position:relative;
   width:62px;height:62px;
@@ -614,13 +614,31 @@ section { overflow-x: clip; }
   .venue-inner{padding:40px 16px}
   .qr{padding:10px}
 }
+/* Narrow phones, without JavaScript: sub-lines may wrap, at a readable size (the script above refines this per screen) */
+@media (max-width:370px){
+  .t-sub{white-space:normal;font-size:9px}
+}
+.t-sub{text-wrap:balance}   /* when a sub-line does wrap, split it into two even lines: "FEAST &" / "CELEBRATE" */
+/* Very narrow screens (foldable cover screens, about 300px or less): a little less side padding on the opening screen, so the names
+   (which shrink with the screen, down to 20px) and the Bismillah always fit inside it. */
+@media (max-width:300px){
+  .opening .content{padding-left:16px;padding-right:16px}
+  .opening .scrollhint{padding:0 12px;letter-spacing:2px}
+}
 /* Narrow phones and foldable cover screens: the Dua heading may wrap onto two lines instead of ending in an ellipsis */
 @media (max-width:420px){
   .dua h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
 }
-/* Foldable cover screens (about 300px or less): the schedule sub-lines cannot fit on one line at a readable size, so they may wrap */
+/* Foldable cover screens (about 300px or less): the schedule switches to a stacked layout (time above the event name), where the sub-lines have room to wrap */
 @media (max-width:300px){
-  .t-sub{white-space:normal;font-size:8px}
+  /* stack the time above the event name instead of squeezing three columns into one row: [icon] [time / name / sub-line] */
+  .timeline:before{left:26px;transform:none}
+  .t-row{grid-template-columns:44px minmax(0,1fr);grid-template-areas:"mark time" "mark copy";column-gap:10px;row-gap:2px;min-height:84px}
+  .t-mark{grid-area:mark;width:44px;height:44px}
+  .t-mark svg{width:28px;height:28px}
+  .t-time{grid-area:time;text-align:left;padding-right:0;font-size:14px;align-self:end}
+  .t-copy{grid-area:copy;margin-left:0;align-self:start}
+  .t-sub{white-space:normal;font-size:9px}
 }
 /* Phones turned sideways: show the WHOLE landscape video instead of zooming into it. The video keeps its 16:9 shape, centred
    (full height); its left and right edges fade into the dark background, so the empty sides do not look like bars. */
@@ -876,7 +894,7 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   <div class="intro-inner glass-card-light reveal">
     <div class="flower" aria-hidden="true"><svg class="ico"><use href="#ic-star"/></svg></div>
     <p class="label">WITH JOY IN OUR HEARTS</p>
-    <h2>Together with our families,<br>we invite you to<br>celebrate with us.</h2>
+    <h2>Together with our families, we invite you to celebrate with us.</h2>
     <p>As we begin a beautiful new chapter together, your presence would make our celebration even more meaningful.</p>
   </div>
   <div class="scrollhint scrollhint--light">THE DATE REVEAL
@@ -1832,22 +1850,25 @@ guard('schedule sub-lines', function fitScheduleSubs(){
   const subs = Array.prototype.slice.call(document.querySelectorAll('.t-sub'));
   if (!subs.length) return;
 
-  const MAX = 10.5, MIN = 6.5, REF = 100;
+  // One line when the longest sub-line fits at ONE_LINE_MIN (8px) or more. Below that the text would get too small to read, so
+  // the sub-lines are allowed to wrap onto two lines instead, at the more comfortable WRAP_SIZE (9px). (Nothing ever goes below 8px.)
+  const MAX = 10.5, ONE_LINE_MIN = 8, WRAP_SIZE = 9, REF = 100;
   let queued = false;
 
   function fit(){
     queued = false;
-    // Under ~300px nothing fits on one line at a readable size: let the CSS (wrapping, 8px) take over.
-    if (window.innerWidth <= 300){ subs.forEach(function(el){ el.style.fontSize = ''; }); return; }
-    subs.forEach(function(el){ el.style.fontSize = REF + 'px'; });
+    // Under ~300px the CSS takes over completely (stacked layout, wrapping, 9px).
+    if (window.innerWidth <= 300){ subs.forEach(function(el){ el.style.fontSize = ''; el.style.whiteSpace = ''; }); return; }
+    subs.forEach(function(el){ el.style.whiteSpace = 'nowrap'; el.style.fontSize = REF + 'px'; });
     let size = MAX;
     subs.forEach(function(el){
       const room = el.parentElement.clientWidth;      // the text column (.t-copy)
       const natural = el.scrollWidth;                  // width of the line at the reference size
       if (room > 0 && natural > 0) size = Math.min(size, (room / natural) * REF * 0.97);
     });
-    size = Math.max(MIN, size).toFixed(2) + 'px';
-    subs.forEach(function(el){ el.style.fontSize = size; });
+    const wrap = size < ONE_LINE_MIN;
+    const px = (wrap ? WRAP_SIZE : size).toFixed(2) + 'px';
+    subs.forEach(function(el){ el.style.whiteSpace = wrap ? 'normal' : 'nowrap'; el.style.fontSize = px; });
   }
   function schedule(){ if (!queued){ queued = true; requestAnimationFrame(fit); } }
 
@@ -1880,6 +1901,7 @@ guard('scratch card', function(){
     : null;
 
   let lastKey = '';
+  let scratched = false;        // has anything been scratched yet? (set in scratchStamp)
   function sizeCanvas(force){
     const rect = canvas.getBoundingClientRect();
     const key = Math.round(rect.width) + '@' + canvasScale();
@@ -1887,9 +1909,22 @@ guard('scratch card', function(){
     // which would put the foil back on a half-scratched heart. Only rebuild when the width (or pixel ratio) changed.
     if(!force && key === lastKey) return;
     lastKey = key;
+    // Resizing a canvas wipes it, so first keep a copy of the foil as it is now (holes included) ...
+    let snap = null;
+    if(scratched && canvas.width > 0 && canvas.height > 0){
+      snap = document.createElement('canvas');
+      snap.width = canvas.width;  snap.height = canvas.height;
+      snap.getContext('2d').drawImage(canvas, 0, 0);
+    }
     cssW = rect.width;  cssH = rect.height;
     fitCanvas(canvas, ctx, cssW, cssH);
     drawScratchLayer();
+    // ... then cut the old holes back out of the new foil (only the copy's transparency is used, scaled to the new size).
+    if(snap){
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.drawImage(snap, 0, 0, snap.width, snap.height, 0, 0, cssW, cssH);
+      ctx.globalCompositeOperation = 'source-over';
+    }
   }
 
   // The glitter layer is the size of the screen (see the <canvas> at the end of <body>).
@@ -1932,6 +1967,7 @@ guard('scratch card', function(){
 
   // Realistic Foil Scratching Engine with Radial Soft Gradients & Textured Speckles
   function scratchStamp(x, y, radius = 24) {
+    scratched = true;
     ctx.globalCompositeOperation = 'destination-out';
 
     // Soft radial gradient stroke for natural foil edge

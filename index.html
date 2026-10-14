@@ -227,22 +227,22 @@ img{max-width:100%}
 html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the entrance can't scroll; removed when it opens */
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
-.entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1.005);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
+.entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
 /* Poster overlay: sits on top of the <video> and stays until real video frames are on screen, so the tap never shows a black gap. */
 .entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:transform 1.15s cubic-bezier(.16,.8,.2,1),opacity .35s ease}
 .entrance.video-live .entrance-poster{opacity:0}
 .entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
 .entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
-.entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video,.entrance-stage:hover .entrance-poster,.entrance-stage:focus .entrance-poster{transform:scale(1.01)}
+.entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video,.entrance-stage:hover .entrance-poster,.entrance-stage:focus .entrance-poster{transform:scale(1)}
 /* Keyboard focus: the hairline frame (the :after above) becomes a clear gold ring, only for keyboard users (:focus-visible),
    so Tab shows where you are and that Enter / Space opens the invitation. It sits above the video, so nothing can cover it. */
 .entrance-stage:focus-visible:after{border:3px solid var(--gold);box-shadow:inset 0 0 0 1px rgba(22,11,15,.75),0 0 0 1px rgba(22,11,15,.75),inset 0 0 80px rgba(0,0,0,.18)}
 .entrance.entering .entrance-stage:focus-visible:after{border-color:transparent;box-shadow:none} /* ring gets out of the way once it opens */
 /* the video no longer fades to black on its own - the whole overlay dissolves into the hero instead (no dark gap) */
-.entrance.entering .entrance-video,.entrance.entering .entrance-poster{transform:scale(1.07);filter:blur(6px) brightness(1.15)}
+.entrance.entering .entrance-video,.entrance.entering .entrance-poster{transform:scale(1);filter:blur(6px) brightness(1.15)}
 @media(max-width:650px){
   .entrance-stage:after{inset:5px}
-  /* Phone entrance video: use the dedicated portrait 9:16 file and fill the screen. */
+  /* Phone entrance video: fill the viewport; minor edge cropping is expected when ratios differ. */
   .entrance-video,.entrance-poster{
     width:100%;
     height:100%;
@@ -508,7 +508,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px clamp(10p
 @keyframes tickPulse{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
 
 /* --- Outline gold buttons (Add to Calendar / Share) --- */
-.btn-gold-outline{display:inline-block;margin-top:30px;padding:14px 28px;border:1px solid var(--gold);color:var(--gold-deep);background:transparent;border-radius:30px;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),box-shadow .35s ease,background .35s ease,color .35s ease}
+.btn-gold-outline{display:inline-block;margin-top:30px;padding:14px 28px;border:1px solid var(--gold);color:var(--gold-text);background:transparent;border-radius:30px;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),box-shadow .35s ease,background .35s ease,color .35s ease}
 .btn-gold-outline:hover,.btn-gold-outline:focus{background:var(--gold);color:#241419;transform:translateY(-3px);box-shadow:0 8px 25px rgba(213,173,103,.35)}
 .closing .btn-gold-outline{border-color:var(--gold-deep)}
 .closing .btn-gold-outline:hover{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff}
@@ -618,7 +618,8 @@ section { overflow-x: clip; }
 @media (max-width:370px){
   .t-sub{white-space:normal;font-size:9px}
 }
-.t-sub{text-wrap:balance}   /* when a sub-line does wrap, split it into two even lines: "FEAST &" / "CELEBRATE" */
+.t-sub{text-wrap:balance}
+.intro h2{text-wrap:balance}   /* the intro heading wraps into even lines, with no single word left alone on the last one */   /* when a sub-line does wrap, split it into two even lines: "FEAST &" / "CELEBRATE" */
 /* Very narrow screens (foldable cover screens, about 300px or less): a little less side padding on the opening screen, so the names
    (which shrink with the screen, down to 20px) and the Bismillah always fit inside it. */
 @media (max-width:300px){
@@ -640,23 +641,22 @@ section { overflow-x: clip; }
   .t-copy{grid-area:copy;margin-left:0;align-self:start}
   .t-sub{white-space:normal;font-size:9px}
 }
-/* Phones turned sideways: show the WHOLE landscape video instead of zooming into it. The video keeps its 16:9 shape, centred
-   (full height); its left and right edges fade into the dark background, so the empty sides do not look like bars. */
+/* Landscape phones: fill the viewport with the 16:9 frame; very wide screens are handled by the exception below. */
 @media (max-height:500px) and (orientation:landscape){
   .entrance-video,.entrance-poster{
-    width:auto;height:100%;max-width:100%;aspect-ratio:16/9;object-fit:cover;
-    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%);
-            mask-image:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%);
+    width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:cover;
+    -webkit-mask-image:none;mask-image:none;
   }
 }
-/* The phone was turned AFTER the video started: keep the same video, but show all of it (no zoom, nothing cropped), centred. */
+/* The phone was turned AFTER the video started: keep the same video and fill the viewport. */
 .entrance.shape-mismatch .entrance-video,
 .entrance.shape-mismatch .entrance-poster{
-  width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:contain;
+  width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:cover;
   -webkit-mask-image:none;mask-image:none;
 }
-/* Monitors much wider than the video (about 2.5:1 or wider): show the whole picture instead of cropping the top and bottom */
-@media (min-aspect-ratio:5/2){
+/* Default: fill the screen. At 21:9 and wider, preserve the full frame to avoid excessive vertical cropping. */
+.entrance-video,.entrance-poster{object-fit:cover}
+@media (min-aspect-ratio:21/9){
   .entrance-video,.entrance-poster{object-fit:contain}
 }
 
@@ -834,8 +834,26 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
     var frac = v.duration > 0 ? v.currentTime / v.duration : 0;  // how far through the story we are
     var oldUrl = objectUrl, previous = current;
     objectUrl = URL.createObjectURL(blob);
-    var guard = setTimeout(function () { finish(); openNow(); }, 5000);   // never leave the guest stuck on a blank screen
-    v.style.transition = 'none';                                // hide the changeover (no slow fade)
+
+    // Freeze the currently visible frame in the poster layer before changing the video source.
+    // This keeps the guest's current image on screen while the replacement file loads and starts.
+    var hasSnapshot = false;
+    if (p && v.videoWidth > 0 && v.videoHeight > 0) {
+      try {
+        var frame = document.createElement('canvas');
+        frame.width = v.videoWidth;
+        frame.height = v.videoHeight;
+        frame.getContext('2d').drawImage(v, 0, 0, frame.width, frame.height);
+        p.src = frame.toDataURL('image/jpeg', 0.92);
+        p.style.transition = 'none';
+        p.style.opacity = '1';
+        hasSnapshot = true;
+      } catch (e) { /* If frame capture is blocked, leave the existing poster as a fallback. */ }
+    }
+
+    // Keep the frozen frame visible if loading stalls; the existing five-second fallback opens the invitation.
+    var guard = setTimeout(function () { openNow(); }, 5000);
+    v.style.transition = 'none';
     v.style.opacity = '0';
     function finish() {
       clearTimeout(guard);
@@ -843,6 +861,15 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
       swapping = false;
       v.style.transition = 'opacity .35s ease';
       v.style.opacity = '1';
+      if (hasSnapshot && p) {
+        p.style.transition = 'opacity .35s ease';
+        p.style.opacity = '0';
+        setTimeout(function () {
+          p.src = v.getAttribute('data-poster-' + current);
+          p.style.transition = '';
+          p.style.opacity = '';
+        }, 450);
+      }
       setTimeout(function () { v.style.transition = ''; v.style.opacity = ''; }, 450);
       if (oldUrl) { try { URL.revokeObjectURL(oldUrl); } catch (e) {} }
       getBlob(previous).catch(function () {});                           // so turning back is instant too
@@ -894,7 +921,7 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   <div class="intro-inner glass-card-light reveal">
     <div class="flower" aria-hidden="true"><svg class="ico"><use href="#ic-star"/></svg></div>
     <p class="label">WITH JOY IN OUR HEARTS</p>
-    <h2>Together with our families, we invite you to celebrate with us.</h2>
+    <h2>Together with our families, we invite you to celebrate with&nbsp;us.</h2>
     <p>As we begin a beautiful new chapter together, your presence would make our celebration even more meaningful.</p>
   </div>
   <div class="scrollhint scrollhint--light">THE DATE REVEAL

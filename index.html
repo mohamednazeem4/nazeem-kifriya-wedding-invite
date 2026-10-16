@@ -229,7 +229,7 @@ html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the e
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
 .entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;aspect-ratio:auto;object-fit:contain;object-position:center;display:block;transform:none;transition:filter 1s ease,opacity .35s ease}
 /* Poster overlay: stays until real video frames are on screen, so the tap never shows a black gap. */
-/* Cover is enabled by JS only for the documented phone-portrait crop range; all other mismatches use contain. */
+/* JS enables cover only when the source-dimension crop stays within the per-video thresholds. */
 .entrance.cover-match .entrance-video,.entrance.cover-match .entrance-poster{object-fit:cover}
 .entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:opacity .25s ease}
 .entrance.video-live .entrance-poster{opacity:0}
@@ -649,20 +649,18 @@ section { overflow-x: clip; }
   .t-copy{grid-area:copy;margin-left:0;align-self:start}
   .t-sub{white-space:normal;font-size:9px}
 }
-/* Short landscape viewports: keep the 16:9 source centred and uncropped; do not fade away the source's edges. */
-@media (max-height:500px) and (orientation:landscape){
-  .entrance-video,.entrance-poster{
-    width:auto;height:100%;max-width:100%;aspect-ratio:16/9;object-fit:contain;
-    -webkit-mask-image:none;mask-image:none;
-  }
-}
+/* Entrance fit is controlled by shouldShowWholeFrame() and the cover-match / shape-mismatch
+   classes at every size, including short landscape phones, so media-query sizing cannot override
+   the crop-percentage thresholds. */
 /* Whole-frame mode is enabled whenever cover would crop any part of the source frame. */
 .entrance.shape-mismatch .entrance-video,
 .entrance.shape-mismatch .entrance-poster{
   width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;object-fit:contain;
   -webkit-mask-image:none;mask-image:none;transform:none;
 }
-/* CSS-only safety nets for ultrawide and near-square viewports. JavaScript applies the same rule to other mismatched ratios. */
+/* CSS-only safety nets for ratios that always exceed the configured crop limits:
+   ultrawide (landscape vertical crop >15%) and near-square (portrait vertical or landscape width crop too large).
+   JavaScript applies the same threshold rule to all remaining aspect ratios. */
 @media (min-aspect-ratio:21/9){
   .entrance-video,.entrance-poster{object-fit:contain;transform:none}
 }
@@ -766,7 +764,12 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   var preloadStarted = false;
   var userStarted = false;
   var canPreload = !!(window.fetch && window.Promise && window.URL && URL.createObjectURL && window.Blob);
-  var CROP_TOLERANCE = 0; // Any mismatch outside the explicit phone-portrait cover range uses contain.
+  // Maximum source-frame crop allowed before switching from cover to contain.
+  // A crop is measured as the fraction of the source dimension cut off in the affected axis.
+  var CROP_LIMITS = {
+    mobile:  { width: 0.185, height: 0.20 }, // portrait: 18.5% width, 20% height
+    desktop: { width: 0.23,  height: 0.15 }  // landscape: 23% width, 15% height
+  };
 
   v.addEventListener('play', function () { began = true; userStarted = true; });
 
@@ -776,25 +779,29 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   function openNow() { if (typeof openInvitation === 'function') openInvitation(); }
   function wholeVideoMode(on) { if (entrance) entrance.classList.toggle('shape-mismatch', !!on); }
 
-  // Determine whether cover would crop the selected source in this viewport.
-  // The explicit phone-portrait range below is the only intentional mismatch exception.
+  // Determine how much source content object-fit:cover would remove in this viewport.
+  // When the viewport is narrower than the source, cover crops source width; when wider,
+  // it crops source height. Switch to contain if either axis exceeds that video's limit.
   function shouldShowWholeFrame(kind) {
     var vw = window.innerWidth || document.documentElement.clientWidth;
     var vh = window.innerHeight || document.documentElement.clientHeight;
     if (!vw || !vh) return true;
+
     var viewportRatio = vw / vh;
     var sourceRatio = kind === 'mobile' ? (9 / 16) : (16 / 9);
-    // Intentional edge-to-edge crop policy: typical phone-shaped portrait viewports from 320–480 CSS px
-    // wide and a 0.45–0.60 viewport ratio use cover, regardless of brand/browser. The higher 0.45
-    // lower bound excludes unusually tall/narrow phones and foldable cover screens, where side cropping
-    // would be more aggressive. Every other mismatch uses contain to preserve the entire source frame.
-    var phonePortraitCover = kind === 'mobile' && vh > vw && vw >= 320 && vw <= 480 &&
-      viewportRatio >= 0.45 && viewportRatio <= 0.60;
-    if (phonePortraitCover) return false;
-    var cropFraction = viewportRatio < sourceRatio
-      ? 1 - (viewportRatio / sourceRatio)
-      : 1 - (sourceRatio / viewportRatio);
-    return cropFraction > CROP_TOLERANCE;
+    var limits = CROP_LIMITS[kind] || CROP_LIMITS.desktop;
+    var cropWidth = 0;
+    var cropHeight = 0;
+
+    if (viewportRatio < sourceRatio) {
+      cropWidth = 1 - (viewportRatio / sourceRatio);
+    } else if (viewportRatio > sourceRatio) {
+      cropHeight = 1 - (sourceRatio / viewportRatio);
+    }
+
+    // Small epsilon prevents floating-point rounding from treating an exact threshold as "more than".
+    var epsilon = 1e-9;
+    return cropWidth > limits.width + epsilon || cropHeight > limits.height + epsilon;
   }
   function updateFitMode(kind) {
     var fitKind = kind || current || desiredKind();

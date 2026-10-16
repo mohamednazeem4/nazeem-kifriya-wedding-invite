@@ -227,28 +227,36 @@ img{max-width:100%}
 html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the entrance can't scroll; removed when it opens */
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
-.entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;object-fit:cover;object-position:center;display:block;transform:scale(1);transition:transform 1.15s cubic-bezier(.16,.8,.2,1),filter 1s ease,opacity .9s ease}
-/* Poster overlay: sits on top of the <video> and stays until real video frames are on screen, so the tap never shows a black gap. */
-.entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:transform 1.15s cubic-bezier(.16,.8,.2,1),opacity .35s ease}
+.entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;aspect-ratio:auto;object-fit:contain;object-position:center;display:block;transform:none;transition:filter 1s ease,opacity .35s ease}
+/* Poster overlay: stays until real video frames are on screen, so the tap never shows a black gap. */
+/* Cover is enabled by JS only for the documented phone-portrait crop range; all other mismatches use contain. */
+.entrance.cover-match .entrance-video,.entrance.cover-match .entrance-poster{object-fit:cover}
+.entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:opacity .25s ease}
 .entrance.video-live .entrance-poster{opacity:0}
+/* During a source swap, the captured frame stays fully visible until the replacement has rendered. */
+.entrance.source-switching .entrance-poster{opacity:1!important;object-fit:contain!important;transform:none!important;transition:none!important}
+/* If the current frame cannot be captured, intentionally show a black gap while the orientation-matched video loads. */
+.entrance.source-switching-black .entrance-stage{background:#000!important}
+.entrance.source-switching-black .entrance-video{visibility:hidden!important;opacity:0!important}
+.entrance.source-switching-black .entrance-poster{visibility:hidden!important;opacity:0!important}
 .entrance-stage:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 56%,transparent 0%,rgba(12,5,8,.05) 48%,rgba(12,5,8,.34) 100%);opacity:.8}
 .entrance-stage:after{content:"";position:absolute;inset:7px;z-index:3;pointer-events:none;border:1px solid rgba(213,173,103,.22);box-shadow:inset 0 0 80px rgba(0,0,0,.18)}
-.entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video,.entrance-stage:hover .entrance-poster,.entrance-stage:focus .entrance-poster{transform:scale(1)}
+.entrance-stage:hover .entrance-video,.entrance-stage:focus .entrance-video,.entrance-stage:hover .entrance-poster,.entrance-stage:focus .entrance-poster{transform:none}
 /* Keyboard focus: the hairline frame (the :after above) becomes a clear gold ring, only for keyboard users (:focus-visible),
    so Tab shows where you are and that Enter / Space opens the invitation. It sits above the video, so nothing can cover it. */
 .entrance-stage:focus-visible:after{border:3px solid var(--gold);box-shadow:inset 0 0 0 1px rgba(22,11,15,.75),0 0 0 1px rgba(22,11,15,.75),inset 0 0 80px rgba(0,0,0,.18)}
 .entrance.entering .entrance-stage:focus-visible:after{border-color:transparent;box-shadow:none} /* ring gets out of the way once it opens */
 /* the video no longer fades to black on its own - the whole overlay dissolves into the hero instead (no dark gap) */
-.entrance.entering .entrance-video,.entrance.entering .entrance-poster{transform:scale(1);filter:blur(6px) brightness(1.15)}
+.entrance.entering .entrance-video,.entrance.entering .entrance-poster{transform:none;filter:blur(2px) brightness(1.08)}
 @media(max-width:650px){
   .entrance-stage:after{inset:5px}
-  /* Phone entrance video: fill the viewport; minor edge cropping is expected when ratios differ. */
+  /* Phone entrance video: use the dedicated portrait 9:16 file. Fit is chosen below to avoid meaningful content loss. */
   .entrance-video,.entrance-poster{
     width:100%;
     height:100%;
     max-width:none;
     max-height:none;
-    object-fit:cover;
+    object-fit:contain;
     object-position:center;
   }
 }
@@ -508,7 +516,7 @@ footer{background:#12090d;color:#bda7a0;text-align:center;padding:25px clamp(10p
 @keyframes tickPulse{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
 
 /* --- Outline gold buttons (Add to Calendar / Share) --- */
-.btn-gold-outline{display:inline-block;margin-top:30px;padding:14px 28px;border:1px solid var(--gold);color:var(--gold-text);background:transparent;border-radius:30px;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),box-shadow .35s ease,background .35s ease,color .35s ease}
+.btn-gold-outline{display:inline-block;margin-top:30px;padding:14px 28px;border:1px solid var(--gold);color:var(--gold-deep);background:transparent;border-radius:30px;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:2px;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .35s var(--ease-fluid),box-shadow .35s ease,background .35s ease,color .35s ease}
 .btn-gold-outline:hover,.btn-gold-outline:focus{background:var(--gold);color:#241419;transform:translateY(-3px);box-shadow:0 8px 25px rgba(213,173,103,.35)}
 .closing .btn-gold-outline{border-color:var(--gold-deep)}
 .closing .btn-gold-outline:hover{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff}
@@ -641,23 +649,25 @@ section { overflow-x: clip; }
   .t-copy{grid-area:copy;margin-left:0;align-self:start}
   .t-sub{white-space:normal;font-size:9px}
 }
-/* Landscape phones: fill the viewport with the 16:9 frame; very wide screens are handled by the exception below. */
+/* Short landscape viewports: keep the 16:9 source centred and uncropped; do not fade away the source's edges. */
 @media (max-height:500px) and (orientation:landscape){
   .entrance-video,.entrance-poster{
-    width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:cover;
+    width:auto;height:100%;max-width:100%;aspect-ratio:16/9;object-fit:contain;
     -webkit-mask-image:none;mask-image:none;
   }
 }
-/* The phone was turned AFTER the video started: keep the same video and fill the viewport. */
+/* Whole-frame mode is enabled whenever cover would crop any part of the source frame. */
 .entrance.shape-mismatch .entrance-video,
 .entrance.shape-mismatch .entrance-poster{
-  width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:cover;
-  -webkit-mask-image:none;mask-image:none;
+  width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;object-fit:contain;
+  -webkit-mask-image:none;mask-image:none;transform:none;
 }
-/* Default: fill the screen. At 21:9 and wider, preserve the full frame to avoid excessive vertical cropping. */
-.entrance-video,.entrance-poster{object-fit:cover}
+/* CSS-only safety nets for ultrawide and near-square viewports. JavaScript applies the same rule to other mismatched ratios. */
 @media (min-aspect-ratio:21/9){
-  .entrance-video,.entrance-poster{object-fit:contain}
+  .entrance-video,.entrance-poster{object-fit:contain;transform:none}
+}
+@media (min-aspect-ratio:4/5) and (max-aspect-ratio:5/4){
+  .entrance-video,.entrance-poster{object-fit:contain;transform:none}
 }
 
 /* ================= SAFE AREAS (notched phones in landscape; viewport-fit=cover) ================= */
@@ -734,170 +744,377 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   </div>
 </div>
 
-<!-- Entrance media picker. Phones (max-width:650px, the same breakpoint as the CSS) get the 9:16 video + 9:16 poster,
-     everything else gets the original 16:9 video + poster. <source media="..."> is unreliable on <video> and is only
-     read once, so it is chosen here instead. If the screen changes class BEFORE the guest taps (e.g. rotating a phone),
-     it switches; once playback has started it never swaps. Runs straight after the <video> so nothing loads twice. -->
+<!-- Entrance media picker. The viewport aspect ratio selects the portrait 9:16 or landscape 16:9 source.
+     After playback starts, orientation changes swap sources; a captured current frame stays visible until the
+     replacement paints. If frame capture fails, show black while the orientation-matched replacement loads. -->
 <script>
 (function () {
   var v = document.getElementById('entranceVideo');
   var p = document.getElementById('entrancePoster');
   var entrance = document.getElementById('entrance');
   if (!v || !window.matchMedia) return;
-  // Tall or square screens (phones, portrait iPads, unfolded foldables) get the portrait video; wide ones get the landscape video.
+
+  // Pick the portrait or landscape asset by viewport shape, not by an arbitrary CSS width breakpoint.
   var mq = window.matchMedia('(max-aspect-ratio: 1/1)');
   var current = '';
   var began = false;
   var swapping = false;
   var objectUrl = '';
-  var blobs = {};        // videos already downloaded into memory, by kind ('mobile' / 'desktop')
-  var loading = {};      // downloads in progress
+  var blobs = {};
+  var loading = {};
+  var loadingControllers = {};
+  var preloadStarted = false;
+  var userStarted = false;
   var canPreload = !!(window.fetch && window.Promise && window.URL && URL.createObjectURL && window.Blob);
-  v.addEventListener('play', function () { began = true; });
+  var CROP_TOLERANCE = 0; // Any mismatch outside the explicit phone-portrait cover range uses contain.
 
+  v.addEventListener('play', function () { began = true; userStarted = true; });
+
+  function desiredKind() { return mq.matches ? 'mobile' : 'desktop'; }
   function other(kind) { return kind === 'mobile' ? 'desktop' : 'mobile'; }
-  function wholeVideoMode(on) { if (entrance) entrance.classList.toggle('shape-mismatch', on); }
   function isClosing() { return !!(entrance && entrance.classList.contains('entering')); }
   function openNow() { if (typeof openInvitation === 'function') openInvitation(); }
+  function wholeVideoMode(on) { if (entrance) entrance.classList.toggle('shape-mismatch', !!on); }
 
-  // Download one of the two videos into memory (only once). Resolves with the file.
+  // Determine whether cover would crop the selected source in this viewport.
+  // The explicit phone-portrait range below is the only intentional mismatch exception.
+  function shouldShowWholeFrame(kind) {
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    if (!vw || !vh) return true;
+    var viewportRatio = vw / vh;
+    var sourceRatio = kind === 'mobile' ? (9 / 16) : (16 / 9);
+    // Intentional edge-to-edge crop policy: typical phone-shaped portrait viewports from 320–480 CSS px
+    // wide and a 0.45–0.60 viewport ratio use cover, regardless of brand/browser. The higher 0.45
+    // lower bound excludes unusually tall/narrow phones and foldable cover screens, where side cropping
+    // would be more aggressive. Every other mismatch uses contain to preserve the entire source frame.
+    var phonePortraitCover = kind === 'mobile' && vh > vw && vw >= 320 && vw <= 480 &&
+      viewportRatio >= 0.45 && viewportRatio <= 0.60;
+    if (phonePortraitCover) return false;
+    var cropFraction = viewportRatio < sourceRatio
+      ? 1 - (viewportRatio / sourceRatio)
+      : 1 - (sourceRatio / viewportRatio);
+    return cropFraction > CROP_TOLERANCE;
+  }
+  function updateFitMode(kind) {
+    var fitKind = kind || current || desiredKind();
+    var showWhole = shouldShowWholeFrame(fitKind);
+    wholeVideoMode(showWhole);
+    if (entrance) entrance.classList.toggle('cover-match', !showWhole);
+  }
+
   function getBlob(kind) {
     if (blobs[kind]) return Promise.resolve(blobs[kind]);
     if (loading[kind]) return loading[kind];
-    loading[kind] = fetch(v.getAttribute('data-src-' + kind))
+
+    var controller = typeof window.AbortController === 'function' ? new AbortController() : null;
+    if (controller) loadingControllers[kind] = controller;
+    var request = fetch(
+      v.getAttribute('data-src-' + kind),
+      controller ? { signal: controller.signal } : undefined
+    )
       .then(function (r) { if (!r.ok) throw new Error('video download failed'); return r.blob(); })
-      .then(function (b) { blobs[kind] = new Blob([b], { type: 'video/mp4' }); loading[kind] = null; return blobs[kind]; })
-      .catch(function (e) { loading[kind] = null; throw e; });
-    return loading[kind];
+      .then(function (b) {
+        blobs[kind] = new Blob([b], { type: b.type || 'video/mp4' });
+        // Do not let an older aborted request clear a newer request for the same kind.
+        if (loading[kind] === request) loading[kind] = null;
+        if (loadingControllers[kind] === controller) loadingControllers[kind] = null;
+        return blobs[kind];
+      })
+      .catch(function (e) {
+        if (loading[kind] === request) loading[kind] = null;
+        if (loadingControllers[kind] === controller) loadingControllers[kind] = null;
+        throw e;
+      });
+    loading[kind] = request;
+    return request;
   }
 
-  // Once the video that matches the screen is ready, quietly fetch the OTHER one (and its poster) in the background,
-  // so a turn of the phone - before or after the tap - never has to wait for a download. Skipped on Data Saver / very slow links.
-  function preloadOther() {
-    if (!canPreload || !current) return;
-    var c = navigator.connection;
-    if (c && (c.saveData || /2g/.test(c.effectiveType || ''))) return;
-    var o = other(current);
-    getBlob(o).catch(function () {});
-    var img = new Image();
-    img.src = v.getAttribute('data-poster-' + o);
+  // Cancel an obsolete pre-click download so a newly selected orientation can take priority.
+  // The current playback/source-swap path never calls this after playback has begun.
+  function cancelPendingBlobLoad(kind) {
+    var controller = loadingControllers[kind];
+    if (!controller || !loading[kind] || blobs[kind]) return false;
+    var oldRequest = loading[kind];
+    loading[kind] = null;
+    loadingControllers[kind] = null;
+    try { controller.abort(); } catch (e) {}
+    return !!oldRequest;
+  }
+
+  // The <video> element natively loads the currently selected orientation (preload="auto").
+  // Fetch only the alternate orientation as a blob, avoiding a second fetch of the same active MP4.
+  // If the viewport changes before the guest taps, cancel an obsolete alternate fetch and reprioritize.
+  var preloadTarget = '';
+  var preloadGeneration = 0;
+  var preloadRunGeneration = -1;
+  var preloadActiveKind = '';
+  function preloadBothBeforeClick() {
+    if (!canPreload || began || isClosing()) return;
+    var target = desiredKind();
+    var alternateKind = other(target);
+
+    if (target !== preloadTarget) {
+      var staleKind = preloadActiveKind;
+      preloadTarget = target;
+      preloadGeneration++;
+      // A stale fetch that has become the active orientation should be cancelled: the video element
+      // now owns that file's request. The new alternate is the only MP4 fetched as a blob.
+      if (staleKind && staleKind !== alternateKind && !blobs[staleKind]) cancelPendingBlobLoad(staleKind);
+      preloadActiveKind = '';
+    }
+    if (preloadRunGeneration === preloadGeneration) return;
+
+    var generation = preloadGeneration;
+    preloadRunGeneration = generation;
+    preloadActiveKind = alternateKind;
+
+    getBlob(alternateKind).then(function () {
+      if (generation !== preloadGeneration || target !== desiredKind() || began || isClosing()) {
+        if (generation !== preloadGeneration && !began && !isClosing()) preloadBothBeforeClick();
+        return;
+      }
+      preloadActiveKind = '';
+      var img = new Image();
+      img.decoding = 'async';
+      img.src = v.getAttribute('data-poster-' + alternateKind);
+    }).catch(function () {
+      if (generation === preloadGeneration) preloadActiveKind = '';
+      // If this was an aborted obsolete request, the newer generation already owns the queue.
+      if (generation !== preloadGeneration && !began && !isClosing()) preloadBothBeforeClick();
+      // A real preload failure never blocks the invitation or starts an automatic retry loop.
+    });
   }
   function fullyBuffered() {
     try { return v.duration > 0 && v.buffered.length > 0 && v.buffered.end(v.buffered.length - 1) >= v.duration - 0.25; }
     catch (e) { return false; }
   }
-  v.addEventListener('canplaythrough', preloadOther);
-  v.addEventListener('progress', function () { if (fullyBuffered()) preloadOther(); });
-  v.addEventListener('playing', function once() {              // phones that never pre-buffer (iOS): start soon after playback begins
-    v.removeEventListener('playing', once);
-    setTimeout(preloadOther, 4000);
-  });
+  // Capture the playing frame and show it as an uncropped overlay before changing the video source.
+  // If capture is not possible, the caller shows a black gap while swapping to the orientation-matched source.
+  function preserveCurrentFrame() {
+    if (!p || !entrance || !v.videoWidth || !v.videoHeight || v.readyState < 2) {
+      return Promise.resolve(false);
+    }
+    try {
+      var canvas = document.createElement('canvas');
+      canvas.width = v.videoWidth;
+      canvas.height = v.videoHeight;
+      var ctx = canvas.getContext('2d');
+      if (!ctx) return Promise.resolve(false);
+      ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+      var snapshotUrl = canvas.toDataURL('image/jpeg', 0.94);
+      var probe = new Image();
+      return new Promise(function (resolve) {
+        var finished = false;
+        var failTimer = setTimeout(fail, 1200);
+        function fail() {
+          if (!finished) {
+            finished = true;
+            clearTimeout(failTimer);
+            resolve(false);
+          }
+        }
+        function ready() {
+          if (finished) return;
+          finished = true;
+          clearTimeout(failTimer);
+          p.src = snapshotUrl;
+          entrance.classList.remove('video-live');
+          entrance.classList.add('source-switching');
+          // Let the decoded still paint before the <video> source is replaced.
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { resolve(true); });
+          });
+        }
+        probe.onload = ready;
+        probe.onerror = fail;
+        probe.src = snapshotUrl;
+        if (probe.decode) { try { probe.decode().then(ready).catch(function () { /* onload/onerror remains the fallback */ }); } catch (e) {} }
+      });
+    } catch (e) {
+      return Promise.resolve(false);
+    }
+  }
+
+  function releaseSwitchOverlay() {
+    if (!entrance) return;
+    entrance.classList.remove('source-switching', 'source-switching-black');
+    entrance.classList.add('video-live');
+  }
 
   function pick() {
-    var kind = mq.matches ? 'mobile' : 'desktop';
-    if (current && (began || !v.paused || v.ended)) {          // the video has already started
-      if (kind === current) { wholeVideoMode(false); return; } // turned back: back to the normal full-screen look
+    var kind = desiredKind();
+    if (isClosing()) return;
+    if (swapping) {
+      // Do not start concurrent swaps; after this one settles, re-check the actual latest orientation.
+      updateFitMode(current);
+      return;
+    }
+    if (current && kind === current) {
+      updateFitMode(current);
+      return;
+    }
+    if (current && (began || !v.paused || v.ended)) {
       swapWhilePlaying(kind);
       return;
     }
-    if (kind === current) return;
+    // Before playback starts, assigning the selected local source is safe and does not need a frame capture.
     current = kind;
     var posterUrl = v.getAttribute('data-poster-' + kind);
     v.poster = posterUrl;
-    if (p) p.src = posterUrl;                                               // poster overlay (same file, loaded once)
-    // "#t=0.001" makes phones (iOS Safari especially) fetch + decode the FIRST frame up front, so the tap doesn't start from a cold decoder.
+    if (p) p.src = posterUrl;
+    updateFitMode(kind);
     v.src = v.getAttribute('data-src-' + kind) + '#t=0.001';
   }
 
-  // The phone was turned AFTER the video started: switch to the other video and carry on from the same point (by proportion:
-  // both videos tell the same story). Normally that file is already in memory, so the switch is immediate. There is no
-  // "too close to the end" rule: it only stands down if the video has already ended or the invitation is already opening.
   function swapWhilePlaying(kind) {
-    if (!canPreload) { wholeVideoMode(true); return; }           // old phone: just show the playing video whole
+    if (!canPreload) {
+      updateFitMode(current); // Legacy browser: keep the current file and show its entire frame when shapes differ.
+      return;
+    }
     if (swapping || v.ended || isClosing()) return;
     swapping = true;
-    if (!blobs[kind]) wholeVideoMode(true);                     // not downloaded yet: show the playing video whole meanwhile
-    getBlob(kind)
-      .then(function (blob) {
-        var wanted = mq.matches ? 'mobile' : 'desktop';
-        if (wanted !== kind || v.ended || isClosing()) {        // no longer wanted / too late
-          swapping = false;
-          wholeVideoMode(wanted !== current);
-          return;
-        }
-        switchTo(kind, blob);
-      })
-      .catch(function () { swapping = false; });                // download failed: the playing video simply continues
+    updateFitMode(current); // While waiting for the other file, avoid cropping the playing video.
+    getBlob(kind).then(function (blob) {
+      var wanted = desiredKind();
+      if (wanted !== kind || v.ended || isClosing()) {
+        swapping = false;
+        updateFitMode(current);
+        if (!isClosing() && !v.ended && wanted !== current && wanted !== kind) pick();
+        return;
+      }
+      switchTo(kind, blob);
+    }).catch(function () {
+      swapping = false;
+      updateFitMode(current);
+      // Do not retry the same failed download in a loop. A different final orientation may request its own asset once.
+      var wanted = desiredKind();
+      if (!isClosing() && !v.ended && wanted !== current && wanted !== kind) pick();
+    });
   }
 
   function switchTo(kind, blob) {
-    var frac = v.duration > 0 ? v.currentTime / v.duration : 0;  // how far through the story we are
-    var oldUrl = objectUrl, previous = current;
-    objectUrl = URL.createObjectURL(blob);
+    var startFraction = v.duration > 0 ? v.currentTime / v.duration : 0;
+    var previous = current;
+    var oldUrl = objectUrl;
 
-    // Freeze the currently visible frame in the poster layer before changing the video source.
-    // This keeps the guest's current image on screen while the replacement file loads and starts.
-    var hasSnapshot = false;
-    if (p && v.videoWidth > 0 && v.videoHeight > 0) {
-      try {
-        var frame = document.createElement('canvas');
-        frame.width = v.videoWidth;
-        frame.height = v.videoHeight;
-        frame.getContext('2d').drawImage(v, 0, 0, frame.width, frame.height);
-        p.src = frame.toDataURL('image/jpeg', 0.92);
-        p.style.transition = 'none';
-        p.style.opacity = '1';
-        hasSnapshot = true;
-      } catch (e) { /* If frame capture is blocked, leave the existing poster as a fallback. */ }
-    }
-
-    // Keep the frozen frame visible if loading stalls; the existing five-second fallback opens the invitation.
-    var guard = setTimeout(function () { openNow(); }, 5000);
-    v.style.transition = 'none';
-    v.style.opacity = '0';
-    function finish() {
-      clearTimeout(guard);
-      v.removeEventListener('loadedmetadata', onMeta);
-      swapping = false;
-      v.style.transition = 'opacity .35s ease';
-      v.style.opacity = '1';
-      if (hasSnapshot && p) {
-        p.style.transition = 'opacity .35s ease';
-        p.style.opacity = '0';
-        setTimeout(function () {
-          p.src = v.getAttribute('data-poster-' + current);
-          p.style.transition = '';
-          p.style.opacity = '';
-        }, 450);
+    preserveCurrentFrame().then(function (preserved) {
+      if (!preserved) {
+        // User preference: when a still cannot be captured, deliberately blank the old video and
+        // continue with the source selected for the device's current orientation.
+        if (entrance) {
+          entrance.classList.remove('source-switching');
+          entrance.classList.add('source-switching-black');
+        }
       }
-      setTimeout(function () { v.style.transition = ''; v.style.opacity = ''; }, 450);
-      if (oldUrl) { try { URL.revokeObjectURL(oldUrl); } catch (e) {} }
-      getBlob(previous).catch(function () {});                           // so turning back is instant too
-      if ((mq.matches ? 'mobile' : 'desktop') !== current) pick();       // turned again meanwhile
-    }
-    function play() {
-      var pr = v.play();
-      if (pr && pr.catch) pr.catch(function () {                // phone refused sound-on playback: carry on silently
-        v.muted = true;
-        var p2 = v.play();
-        if (p2 && p2.catch) p2.catch(function () { finish(); openNow(); });
-      });
-    }
-    function onMeta() {
-      v.removeEventListener('loadedmetadata', onMeta);
-      try { v.currentTime = frac * v.duration; } catch (e) {}
-      v.addEventListener('playing', function shown() { v.removeEventListener('playing', shown); finish(); });
-      play();
-    }
-    v.addEventListener('loadedmetadata', onMeta);
-    current = kind;
-    wholeVideoMode(false);
-    v.src = objectUrl;
+
+      var latest = desiredKind();
+      if (latest !== kind || v.ended || isClosing()) {
+        swapping = false;
+        if (entrance && entrance.classList.contains('source-switching-black') && !isClosing() && !v.ended && latest !== current) {
+          pick();
+        } else {
+          releaseSwitchOverlay();
+          updateFitMode(current);
+          if (!isClosing() && !v.ended && latest !== current) pick();
+        }
+        return;
+      }
+
+      var newUrl = URL.createObjectURL(blob);
+      var completed = false;
+      var timeoutId = null;
+      var frameCallbackId = null;
+
+      function cleanup() {
+        if (timeoutId) clearTimeout(timeoutId);
+        v.removeEventListener('loadedmetadata', onMeta);
+        v.removeEventListener('error', onError);
+        v.removeEventListener('playing', onPlaying);
+        if (frameCallbackId && v.cancelVideoFrameCallback) {
+          try { v.cancelVideoFrameCallback(frameCallbackId); } catch (e) {}
+        }
+      }
+      function failAndOpen() {
+        if (completed) return;
+        completed = true;
+        cleanup();
+        swapping = false;
+        try { v.pause(); } catch (e) {}
+        // Keep the preserved still visible. The entrance dissolves with that frame instead of a blank player.
+        updateFitMode(kind);
+        if (newUrl) { try { URL.revokeObjectURL(newUrl); } catch (e) {} }
+        if (oldUrl && oldUrl !== newUrl) { try { URL.revokeObjectURL(oldUrl); } catch (e) {} }
+        objectUrl = '';
+        openNow();
+      }
+      function finishWithFrame() {
+        if (completed) return;
+        completed = true;
+        cleanup();
+        swapping = false;
+        objectUrl = newUrl;
+        releaseSwitchOverlay();
+        updateFitMode(current);
+        if (oldUrl && oldUrl !== newUrl) { try { URL.revokeObjectURL(oldUrl); } catch (e) {} }
+        // Source changes preserve the playback position proportionally, then reconcile any additional rotations.
+        if (desiredKind() !== current) pick();
+      }
+      function showOnNextFrame() {
+        if (completed) return;
+        if (typeof v.requestVideoFrameCallback === 'function') {
+          frameCallbackId = v.requestVideoFrameCallback(function () { finishWithFrame(); });
+        } else {
+          // Fallback for Safari/older browsers: wait past the playing event and at least two paint frames.
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () { setTimeout(finishWithFrame, 120); });
+          });
+        }
+      }
+      function onPlaying() { showOnNextFrame(); }
+      function onError() { failAndOpen(); }
+      function onMeta() {
+        v.removeEventListener('loadedmetadata', onMeta);
+        try { if (v.duration > 0) v.currentTime = Math.min(0.99, Math.max(0, startFraction)) * v.duration; } catch (e) {}
+        v.addEventListener('playing', onPlaying);
+        var playResult;
+        try { playResult = v.play(); }
+        catch (e) { v.muted = true; try { playResult = v.play(); } catch (_) { failAndOpen(); return; } }
+        if (playResult && playResult.catch) {
+          playResult.catch(function () {
+            v.muted = true;
+            var retry;
+            try { retry = v.play(); } catch (e) { failAndOpen(); return; }
+            if (retry && retry.catch) retry.catch(failAndOpen);
+          });
+        }
+      }
+
+      timeoutId = setTimeout(failAndOpen, 5000);
+      v.addEventListener('loadedmetadata', onMeta);
+      v.addEventListener('error', onError);
+      current = kind;
+      updateFitMode(kind);
+      v.src = newUrl;
+      try { v.load(); } catch (e) {}
+    });
   }
 
+  // Start with the best-matching asset. The video element preloads that source; JavaScript preloads
+  // only the alternate source, and the crop policy is recalculated on every viewport resize.
   pick();
-  if (mq.addEventListener) mq.addEventListener('change', pick);
-  else if (mq.addListener) mq.addListener(pick);                          // older Safari
+  updateFitMode(current);
+  preloadBothBeforeClick();
+  if (mq.addEventListener) mq.addEventListener('change', function () {
+    pick();
+    preloadBothBeforeClick(); // reprioritize the alternate-source preload for the newly selected orientation
+  });
+  else if (mq.addListener) mq.addListener(function () { pick(); preloadBothBeforeClick(); }); // older Safari
+  window.addEventListener('resize', function () {
+    pick(); // Covers browsers that report an orientation/viewport change through resize first.
+    updateFitMode(current);
+    preloadBothBeforeClick(); // also handle split-screen / browser viewport changes
+  });
 })();
 </script>
 
@@ -1520,18 +1737,37 @@ function openInvitation(){
 
 // Start the dissolve a fraction of a second BEFORE the video's last frame, so there is no dead time after it ends.
 const DISSOLVE_LEAD = 0.4;   // seconds before the end (raise for an earlier start, 0 = exactly at the end)
+let videoEndWatcherActive = false;
 function watchForVideoEnd(){
-  if(entrance.classList.contains("entering")) return;
+  if(entrance.classList.contains("entering")) {
+    videoEndWatcherActive = false;
+    return;
+  }
   const d = entranceVideo.duration;
-  if(isFinite(d) && d > DISSOLVE_LEAD && entranceVideo.currentTime >= d - DISSOLVE_LEAD){ openInvitation(); return; }
+  if(isFinite(d) && d > DISSOLVE_LEAD && entranceVideo.currentTime >= d - DISSOLVE_LEAD){
+    videoEndWatcherActive = false;
+    openInvitation();
+    return;
+  }
+  if(entranceVideo.paused || entranceVideo.ended) {
+    videoEndWatcherActive = false;
+    return;
+  }
   requestAnimationFrame(watchForVideoEnd);
 }
-entranceVideo.addEventListener("play", () => requestAnimationFrame(watchForVideoEnd));
+function startVideoEndWatcher(){
+  if(videoEndWatcherActive || entrance.classList.contains("entering")) return;
+  videoEndWatcherActive = true;
+  requestAnimationFrame(watchForVideoEnd);
+}
+entranceVideo.addEventListener("play", startVideoEndWatcher);
 
 // Hold the poster on screen until the video is genuinely painting frames, then cross-fade to it.
 // This hides the buffering / decoder start-up gap that phones otherwise show as a black screen.
 let videoLive = false;
 function showVideo(){
+  // A captured still must remain on top until the replacement video's first frame has actually rendered.
+  if(entrance.classList.contains("source-switching")) return;
   if(videoLive) return;
   videoLive = true;
   entrance.classList.add("video-live");

@@ -227,11 +227,18 @@ img{max-width:100%}
 html.entrance-lock,html.entrance-lock body{overflow:hidden} /* page behind the entrance can't scroll; removed when it opens */
 .entrance.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .entrance-stage{position:relative;width:100%;height:100%;display:grid;place-items:center;cursor:pointer;outline:none;overflow:hidden;touch-action:none}
-.entrance-video,.entrance-poster{grid-area:1/1;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;aspect-ratio:auto;object-fit:contain;object-position:center;display:block;transform:none;transition:filter 1s ease,opacity .35s ease}
+/* When the foreground reaches its crop limit before filling the viewport, this orientation-matched video fills the unused area.
+   It is blurred/darkened so it adds color and motion without competing with the sharp envelope. */
+.entrance-backdrop-video{position:absolute;inset:-8%;width:116%;height:116%;max-width:none;max-height:none;object-fit:cover;object-position:center;filter:blur(22px) brightness(.48) saturate(.82);transform:scale(1.04);opacity:0;pointer-events:none;z-index:0;transition:opacity .35s ease,filter .6s ease}
+.entrance.shape-mismatch .entrance-backdrop-video{opacity:.96}
+.entrance.source-switching-black .entrance-backdrop-video{opacity:0!important}
+.entrance.entering .entrance-backdrop-video{filter:blur(18px) brightness(.52) saturate(.82);opacity:0!important}
+.entrance-video,.entrance-poster{position:absolute;inset:0;margin:auto;left:0;right:0;top:0;bottom:0;grid-area:1/1;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:none;aspect-ratio:auto;object-fit:contain;object-position:center;display:block;transform:none;transition:filter 1s ease,opacity .35s ease}
+.entrance-video{position:absolute;z-index:1}
 /* Poster overlay: stays until real video frames are on screen, so the tap never shows a black gap. */
-/* JS enables cover only when the source-dimension crop stays within the per-video thresholds. */
+/* JS sizes the foreground to the maximum scale permitted by the crop thresholds. */
 .entrance.cover-match .entrance-video,.entrance.cover-match .entrance-poster{object-fit:cover}
-.entrance-poster{position:relative;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:opacity .25s ease}
+.entrance-poster{position:absolute;z-index:1;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:opacity .25s ease}
 .entrance.video-live .entrance-poster{opacity:0}
 /* During a source swap, the captured frame stays fully visible until the replacement has rendered. */
 .entrance.source-switching .entrance-poster{opacity:1!important;object-fit:contain!important;transform:none!important;transition:none!important}
@@ -649,18 +656,14 @@ section { overflow-x: clip; }
   .t-copy{grid-area:copy;margin-left:0;align-self:start}
   .t-sub{white-space:normal;font-size:9px}
 }
-/* Entrance fit is controlled by shouldShowWholeFrame() and the cover-match / shape-mismatch
-   classes at every size, including short landscape phones, so media-query sizing cannot override
-   the crop-percentage thresholds. */
-/* Whole-frame mode is enabled whenever cover would crop any part of the source frame. */
+/* Entrance foreground dimensions are set explicitly by JS so it can stop at the exact crop boundary.
+   shape-mismatch controls only whether the blurred/darkened fill video is shown. */
 .entrance.shape-mismatch .entrance-video,
 .entrance.shape-mismatch .entrance-poster{
-  width:100%;height:100%;max-width:none;max-height:none;aspect-ratio:auto;object-fit:contain;
+  max-width:none;max-height:none;aspect-ratio:auto;object-fit:contain;
   -webkit-mask-image:none;mask-image:none;transform:none;
 }
-/* CSS-only safety nets for ratios that always exceed the configured crop limits:
-   ultrawide (landscape vertical crop >15%) and near-square (portrait vertical or landscape width crop too large).
-   JavaScript applies the same threshold rule to all remaining aspect ratios. */
+/* These object-fit fallbacks are safe because JS provides a correctly proportioned foreground box. */
 @media (min-aspect-ratio:21/9){
   .entrance-video,.entrance-poster{object-fit:contain;transform:none}
 }
@@ -733,6 +736,7 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
 
 <div class="entrance" id="entrance">
   <div class="entrance-stage" id="envelope" role="button" tabindex="0" aria-label="Touch to open wedding invitation">
+    <video class="entrance-backdrop-video" id="entranceBackdropVideo" muted playsinline loop preload="none" aria-hidden="true"></video>
     <video class="entrance-video" id="entranceVideo" playsinline preload="auto"
            data-src-mobile="assets/entrance-video-mobile.mp4"
            data-src-desktop="assets/entrance-video.mp4"
@@ -749,6 +753,7 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
 (function () {
   var v = document.getElementById('entranceVideo');
   var p = document.getElementById('entrancePoster');
+  var bv = document.getElementById('entranceBackdropVideo');
   var entrance = document.getElementById('entrance');
   if (!v || !window.matchMedia) return;
 
@@ -763,15 +768,17 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   var loadingControllers = {};
   var preloadStarted = false;
   var userStarted = false;
+  var backdropKind = '';
+  var backdropSyncing = false;
   var canPreload = !!(window.fetch && window.Promise && window.URL && URL.createObjectURL && window.Blob);
-  // Maximum source-frame crop allowed before switching from cover to contain.
+  // Maximum source-frame crop allowed before the sharp foreground stops expanding.
   // A crop is measured as the fraction of the source dimension cut off in the affected axis.
   var CROP_LIMITS = {
     mobile:  { width: 0.185, height: 0.20 }, // portrait: 18.5% width, 20% height
     desktop: { width: 0.23,  height: 0.15 }  // landscape: 23% width, 15% height
   };
 
-  v.addEventListener('play', function () { began = true; userStarted = true; });
+  v.addEventListener('play', function () { began = true; userStarted = true; syncBackdrop(true); });
 
   function desiredKind() { return mq.matches ? 'mobile' : 'desktop'; }
   function other(kind) { return kind === 'mobile' ? 'desktop' : 'mobile'; }
@@ -779,35 +786,126 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   function openNow() { if (typeof openInvitation === 'function') openInvitation(); }
   function wholeVideoMode(on) { if (entrance) entrance.classList.toggle('shape-mismatch', !!on); }
 
-  // Determine how much source content object-fit:cover would remove in this viewport.
-  // When the viewport is narrower than the source, cover crops source width; when wider,
-  // it crops source height. Switch to contain if either axis exceeds that video's limit.
-  function shouldShowWholeFrame(kind) {
-    var vw = window.innerWidth || document.documentElement.clientWidth;
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-    if (!vw || !vh) return true;
-
-    var viewportRatio = vw / vh;
-    var sourceRatio = kind === 'mobile' ? (9 / 16) : (16 / 9);
+  // Find the largest aspect-preserving foreground size that stays within BOTH crop limits.
+  // The scale starts at cover (large enough to fill the viewport), but is capped at the
+  // exact first crop boundary. Any uncovered area is filled by the blurred/darkened video.
+  function getForegroundSizing(kind, ratioOverride) {
+    var stage = document.getElementById('envelope');
+    var vw = (stage && stage.clientWidth) || window.innerWidth || document.documentElement.clientWidth;
+    var vh = (stage && stage.clientHeight) || window.innerHeight || document.documentElement.clientHeight;
+    var ratio = Number(ratioOverride) || (kind === 'mobile' ? (9 / 16) : (16 / 9));
     var limits = CROP_LIMITS[kind] || CROP_LIMITS.desktop;
-    var cropWidth = 0;
-    var cropHeight = 0;
+    if (!vw || !vh || !ratio) return { width: vw || 1, height: vh || 1, capped: true };
 
-    if (viewportRatio < sourceRatio) {
-      cropWidth = 1 - (viewportRatio / sourceRatio);
-    } else if (viewportRatio > sourceRatio) {
-      cropHeight = 1 - (sourceRatio / viewportRatio);
-    }
-
-    // Small epsilon prevents floating-point rounding from treating an exact threshold as "more than".
-    var epsilon = 1e-9;
-    return cropWidth > limits.width + epsilon || cropHeight > limits.height + epsilon;
+    // Treat the source as ratio-by-1. Scale is therefore the rendered height in CSS pixels.
+    var coverScale = Math.max(vw / ratio, vh);
+    var maxScaleByWidth = vw / (ratio * (1 - limits.width));
+    var maxScaleByHeight = vh / (1 - limits.height);
+    var allowedScale = Math.min(maxScaleByWidth, maxScaleByHeight);
+    var scale = Math.min(coverScale, allowedScale);
+    var epsilon = 1e-7;
+    return {
+      width: ratio * scale,
+      height: scale,
+      capped: coverScale > allowedScale + epsilon
+    };
   }
+
+  function setForegroundBox(el, kind, ratioOverride) {
+    if (!el) return;
+    var box = getForegroundSizing(kind, ratioOverride);
+    el.style.position = 'absolute';
+    el.style.left = '0';
+    el.style.right = '0';
+    el.style.top = '0';
+    el.style.bottom = '0';
+    el.style.margin = 'auto';
+    el.style.width = box.width + 'px';
+    el.style.height = box.height + 'px';
+    el.style.minWidth = '0';
+    el.style.minHeight = '0';
+    el.style.maxWidth = 'none';
+    el.style.maxHeight = 'none';
+    el.style.objectFit = 'contain';
+  }
+  function setBackdropSource(kind) {
+    if (!bv || !kind) return;
+    if (backdropKind === kind && bv.getAttribute('data-backdrop-kind') === kind) return;
+    backdropKind = kind;
+    bv.setAttribute('data-backdrop-kind', kind);
+    bv.poster = v.getAttribute('data-poster-' + kind) || '';
+    // Use the same orientation-specific asset as the sharp foreground. The browser cache can
+    // share this request with the foreground/preload; the backdrop is only decorative.
+    bv.src = v.getAttribute('data-src-' + kind) + '#t=0.001';
+    try { bv.load(); } catch (e) {}
+  }
+
+  function syncBackdrop(force) {
+    if (!bv || !entrance || backdropSyncing) return;
+    if (!entrance.classList.contains('shape-mismatch')) {
+      if (!bv.paused) { try { bv.pause(); } catch (e) {} }
+      return;
+    }
+    var kind = current || desiredKind();
+    if (backdropKind !== kind || bv.getAttribute('data-backdrop-kind') !== kind) setBackdropSource(kind);
+    if (bv.readyState >= 1 && v.readyState >= 1 && bv.duration > 0 && v.duration > 0) {
+      var targetTime = Math.max(0, Math.min(bv.duration - 0.05, (v.currentTime / v.duration) * bv.duration));
+      if (force || Math.abs(bv.currentTime - targetTime) > 0.22) {
+        try { backdropSyncing = true; bv.currentTime = targetTime; } catch (e) {} finally { backdropSyncing = false; }
+      }
+    }
+    if (!v.paused && !v.ended && !isClosing() && !document.hidden) {
+      if (bv.paused) {
+        var result;
+        try { result = bv.play(); } catch (e) { result = null; }
+        if (result && result.catch) result.catch(function () { /* decorative background must never block the invitation */ });
+      }
+    } else if (!bv.paused) {
+      try { bv.pause(); } catch (e) {}
+    }
+  }
+
   function updateFitMode(kind) {
     var fitKind = kind || current || desiredKind();
-    var showWhole = shouldShowWholeFrame(fitKind);
-    wholeVideoMode(showWhole);
-    if (entrance) entrance.classList.toggle('cover-match', !showWhole);
+    var videoRatio = (current === fitKind && v.videoWidth && v.videoHeight)
+      ? (v.videoWidth / v.videoHeight)
+      : (fitKind === 'mobile' ? (9 / 16) : (16 / 9));
+    var videoBox = getForegroundSizing(fitKind, videoRatio);
+    setForegroundBox(v, fitKind, videoRatio);
+
+    // Normally the poster has the selected video's ratio. During a live orientation swap,
+    // however, it may be a captured frame from the previous source; preserve that frame's ratio.
+    var posterRatio = (entrance && entrance.classList.contains('source-switching') && p.naturalWidth && p.naturalHeight)
+      ? (p.naturalWidth / p.naturalHeight)
+      : videoRatio;
+    setForegroundBox(p, fitKind, posterRatio);
+
+    var needsBackdrop = videoBox.capped;
+    wholeVideoMode(needsBackdrop);
+    if (entrance) entrance.classList.toggle('cover-match', !needsBackdrop);
+    if (needsBackdrop) setBackdropSource(fitKind);
+    syncBackdrop(true);
+  }
+
+  // Recalculate using the actual decoded source ratio as soon as the selected clip reports metadata.
+  v.addEventListener('loadedmetadata', function () { updateFitMode(current || desiredKind()); });
+
+  // Keep the blurred fill layer aligned with the selected foreground clip and its playback time.
+  if (bv) {
+    bv.muted = true;
+    bv.defaultMuted = true;
+    bv.playsInline = true;
+    bv.loop = true;
+    bv.addEventListener('loadedmetadata', function () { syncBackdrop(true); });
+    bv.addEventListener('error', function () { /* the matching poster remains as a safe decorative fallback */ });
+    v.addEventListener('timeupdate', function () { syncBackdrop(false); });
+    v.addEventListener('seeked', function () { syncBackdrop(true); });
+    v.addEventListener('playing', function () { syncBackdrop(true); });
+    v.addEventListener('pause', function () { if (!bv.paused) { try { bv.pause(); } catch (e) {} } });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && !bv.paused) { try { bv.pause(); } catch (e) {} }
+      else syncBackdrop(true);
+    });
   }
 
   function getBlob(kind) {
@@ -1734,6 +1832,9 @@ function unlockPage(){
 
 function openInvitation(){
   if(entrance.classList.contains("entering")) return;
+  // Stop the decorative blurred video as soon as the invitation begins to dissolve, so it never
+  // keeps decoding in the background after the entrance overlay has disappeared.
+  try{ const backdropVideo = document.getElementById("entranceBackdropVideo"); if(backdropVideo) backdropVideo.pause(); }catch(_){}
   try{ unlockPage(); }catch(_){}   // never let this get in the way of opening
   // The page is scroll-locked behind the overlay, but a reload can restore an old scroll position: always land on the hero.
   // "instant" overrides html{scroll-behavior:smooth}, so it jumps instead of gliding while the overlay dissolves.

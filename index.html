@@ -641,6 +641,18 @@ section { overflow-x: clip; }
   .opening .content{padding-left:16px;padding-right:16px}
   .opening .scrollhint{padding:0 12px;letter-spacing:2px}
 }
+/* Very narrow AND short portrait viewports (e.g. split-screen / foldable cover preview):
+   compact the hero stack and reserve clear space above the anchored scroll prompt. */
+@media (max-width:300px) and (max-height:500px) and (orientation:portrait){
+  .opening{padding-top:54px;padding-bottom:calc(94px + env(safe-area-inset-bottom,0px))}
+  .opening .content{padding:0 12px}
+  .opening .bismillah{font-size:clamp(13px,3.8vh,16px);line-height:1.2;margin-bottom:8px}
+  .opening .monogram{font-size:14px;letter-spacing:4px}
+  .opening h1{font-size:clamp(18px,7.6vw,22px);line-height:.95;margin:4px 0}
+  .opening h1 .amp{line-height:1.15;margin:.04em 0}
+  .opening .scrollhint{bottom:calc(14px + env(safe-area-inset-bottom,0px));padding:0 10px;font-size:10px;letter-spacing:1.4px;line-height:1.35}
+  .opening .scroll-arrow{width:14px;height:24px;margin:6px auto 0}
+}
 /* Narrow phones and foldable cover screens: the Dua heading may wrap onto two lines instead of ending in an ellipsis */
 @media (max-width:420px){
   .dua h2{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;text-wrap:balance}
@@ -703,6 +715,45 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
    the prompts there would make them jump while scrolling; the hero is already sized to end above the bars by 100svh.) */
 @media (display-mode: standalone), (display-mode: fullscreen){
   .scrollhint,.opening .scrollhint{bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+}
+
+
+/* Narrow foldable/compact screens: keep the three small section labels readable
+   without leaving a single word stranded on a second line. Only applies at 300px
+   and below; larger phone/tablet/desktop typography is unchanged. */
+@media (max-width:300px){
+  .reveal-section p.label--tight{
+    font-size:11px;
+    letter-spacing:1px;
+    line-height:1.35;
+    white-space:nowrap;
+  }
+  .schedule p.label--lg{
+    font-size:12px;
+    letter-spacing:1.2px;
+    line-height:1.35;
+    white-space:nowrap;
+  }
+  .dua .kicker--m{
+    font-size:11px;
+    letter-spacing:1.5px;
+    line-height:1.35;
+    white-space:nowrap;
+  }
+}
+
+/* Welcome heading: improve wrapping on narrow screens up to 320px,
+   without changing the typography of the other sections or wider viewports. */
+@media (max-width: 320px) {
+  .intro-inner {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .intro h2 {
+    font-size: clamp(26px, 10vw, 32px);
+    line-height: 1.08;
+  }
 }
 </style>
 <noscript><style>.entrance{display:none}.bismillah,.monogram,h1,.reveal{opacity:1!important;transform:none!important}</style></noscript>
@@ -814,12 +865,18 @@ footer{padding-bottom:calc(25px + env(safe-area-inset-bottom,0px))}             
   function setForegroundBox(el, kind, ratioOverride) {
     if (!el) return;
     var box = getForegroundSizing(kind, ratioOverride);
+    var stage = document.getElementById('envelope');
+    var stageWidth = (stage && stage.clientWidth) || window.innerWidth || document.documentElement.clientWidth;
+    var stageHeight = (stage && stage.clientHeight) || window.innerHeight || document.documentElement.clientHeight;
+    // Center by coordinates, not by opposing left/right + auto margins. When the foreground
+    // is wider or taller than the stage, CSS absolute-position constraint resolution can
+    // effectively pin it to the start edge. Negative offsets are intentional when it expands.
     el.style.position = 'absolute';
-    el.style.left = '0';
-    el.style.right = '0';
-    el.style.top = '0';
-    el.style.bottom = '0';
-    el.style.margin = 'auto';
+    el.style.left = ((stageWidth - box.width) / 2) + 'px';
+    el.style.right = 'auto';
+    el.style.top = ((stageHeight - box.height) / 2) + 'px';
+    el.style.bottom = 'auto';
+    el.style.margin = '0';
     el.style.width = box.width + 'px';
     el.style.height = box.height + 'px';
     el.style.minWidth = '0';
